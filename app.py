@@ -244,7 +244,7 @@ def mk():
     data.append(d)
     
     tags[query] = tk
-    index[query] = len(data) 
+    index[query] = len(data) - 1
     
     return "done"
 
@@ -323,4 +323,5 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
