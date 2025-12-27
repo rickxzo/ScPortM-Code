@@ -1,4 +1,3 @@
-
 const tab = {
   data() {
     return {
@@ -47,16 +46,31 @@ const tab = {
     buyStock(stock) {
       if (this.boughtMap[stock.name]) return;
 
-      fetch(`/buy?q=${encodeURIComponent(stock.name)}`);
+      const qty = prompt(`Enter quantity to buy for ${stock.name}:`);
 
-      this.$set
-        ? this.$set(this.boughtMap, stock.name, true)
-        : (this.boughtMap[stock.name] = true);
+      // Cancel or empty
+      if (qty === null || qty.trim() === "") {
+        alert("Quantity is required.");
+        return;
+      }
+
+      const n = Number(qty);
+
+      // Invalid number
+      if (isNaN(n) || n <= 0) {
+        alert("Please enter a valid positive number.");
+        return;
+      }
+
+      fetch(`/buy?q=${encodeURIComponent(stock.name)}&n=${n}`);
+
+      this.boughtMap[stock.name] = true;
 
       setTimeout(() => {
         this.boughtMap[stock.name] = false;
       }, 1000);
     },
+
 
     removeStock(stock) {
         const ok = confirm(`Remove ${stock.name}?`);
@@ -201,25 +215,205 @@ const tab = {
   `
 };
 
-
-
 const tab2 = {
   data() {
     return {
-      stocks: [],
+      rows: [],
+      search: "",
       loading: true,
       error: null
     };
   },
 
+  computed: {
+    filteredRows() {
+      if (!this.search) return this.rows;
+      const q = this.search.toLowerCase();
+      return this.rows.filter(r =>
+        r.name.toLowerCase().includes(q) ||
+        String(r.lid).includes(q)
+      );
+    }
+  },
+
+  methods: {
+    loadPortfolio() {
+      this.loading = true;
+
+      fetch("/holding")
+        .then(res => res.json())
+        .then(data => {
+          this.rows = data.map(r => ({
+            lid: r[0],
+            name: r[1],
+            date: r[2],
+            price: r[3],
+            amt: r[4]
+          }));
+          this.loading = false;
+        })
+        .catch(err => {
+          this.error = err.message;
+          this.loading = false;
+        });
+    },
+
+    total(row) {
+      return row.price * row.amt;
+    },
+
+    sell(row) {
+      const ok = confirm(
+        `Sell lot ${row.lid} of ${row.name}?`
+      );
+      if (!ok) return;
+
+      fetch(`/sell?q=${encodeURIComponent(row.name)}&n=${row.lid}`)
+        .then(() => {
+          // refresh portfolio after sell
+          this.loadPortfolio();
+        })
+        .catch(err => {
+          alert("Sell failed");
+          console.error(err);
+        });
+    }
+  },
+
   mounted() {
-    fetch("/holdings")
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch data");
-        return res.json();
-      })
-      .then(json => {
-        this.stocks = json;
+    this.loadPortfolio();
+  },
+
+  template: `
+    <div class="w-full">
+
+      <!-- Search -->
+      <div class="px-4 py-3 bg-white sticky top-0 z-10 border-b">
+        <input
+          v-model="search"
+          placeholder="Search by lot ID or stock name..."
+          class="w-full px-3 py-2 text-sm border rounded
+                 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <!-- Loading -->
+      <div v-if="loading" class="p-4 text-sm text-gray-500">
+        Loading portfolio...
+      </div>
+
+      <!-- Error -->
+      <div v-else-if="error" class="p-4 text-sm text-red-600">
+        {{ error }}
+      </div>
+
+      <!-- Portfolio list -->
+      <div v-else class="p-2 space-y-2">
+
+        <div
+          v-for="row in filteredRows"
+          :key="row.lid"
+          class="px-4 py-3 border rounded bg-white hover:bg-gray-50 transition text-sm"
+        >
+          <div class="flex justify-between items-center">
+
+            <div class="grid grid-cols-6 gap-6 flex-1">
+              <div>
+                <div class="text-xs text-gray-500">Lot ID</div>
+                <div class="font-semibold">{{ row.lid }}</div>
+              </div>
+
+              <div>
+                <div class="text-xs text-gray-500">Name</div>
+                <div class="font-semibold">{{ row.name }}</div>
+              </div>
+
+              <div>
+                <div class="text-xs text-gray-500">Buy Date</div>
+                <div>{{ row.date }}</div>
+              </div>
+
+              <div>
+                <div class="text-xs text-gray-500">Buy Price</div>
+                <div>₹{{ row.price }}</div>
+              </div>
+
+              <div>
+                <div class="text-xs text-gray-500">Amount</div>
+                <div>{{ row.amt }}</div>
+              </div>
+
+              <div>
+                <div class="text-xs text-gray-500">Total</div>
+                <div class="font-semibold">
+                  ₹{{ total(row).toLocaleString() }}
+                </div>
+              </div>
+            </div>
+
+            <button
+              @click="sell(row)"
+              class="ml-4 px-4 py-2 text-sm font-semibold rounded
+                     bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Sell
+            </button>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  `
+};
+
+const tab3 = {
+  data() {
+    return {
+      rows: [],
+      search: "",
+      loading: true,
+      error: null
+    };
+  },
+
+  computed: {
+    filteredRows() {
+      if (!this.search) return this.rows;
+      const q = this.search.toLowerCase();
+      return this.rows.filter(r =>
+        r.name.toLowerCase().includes(q)
+      );
+    },
+
+    totalBuy() {
+      return this.filteredRows.reduce(
+        (sum, r) => sum + r.buy_price * r.amt,
+        0
+      );
+    },
+
+    totalProfit() {
+      return this.filteredRows.reduce(
+        (sum, r) => sum + (r.profit ?? 0),
+        0
+      );
+    }
+  },
+
+  mounted() {
+    fetch("/hist_data")
+      .then(res => res.json())
+      .then(data => {
+        this.rows = data.map(r => ({
+          name: r[0],
+          buy_date: r[1],
+          buy_price: r[2],
+          amt: r[3],
+          sell_price: r[4],
+          profit: r[5],
+          duration: r[6]
+        }));
         this.loading = false;
       })
       .catch(err => {
@@ -228,12 +422,53 @@ const tab2 = {
       });
   },
 
+  methods: {
+    totalBuyRow(row) {
+      return row.buy_price * row.amt;
+    }
+  },
+
   template: `
     <div class="w-full">
 
+      <!-- Summary -->
+      <div class="px-4 py-3 bg-white sticky top-0 z-10 border-b space-y-2">
+
+        <div class="flex gap-8 text-sm">
+          <div>
+            <div class="text-xs text-gray-500">Total Buy</div>
+            <div class="font-semibold">
+              ₹{{ totalBuy.toLocaleString() }}
+            </div>
+          </div>
+
+          <div>
+            <div class="text-xs text-gray-500">Total Profit</div>
+            <div
+              class="font-semibold"
+              :class="totalProfit > 0
+                ? 'text-green-600'
+                : totalProfit < 0
+                  ? 'text-red-600'
+                  : 'text-gray-600'"
+            >
+              ₹{{ totalProfit.toLocaleString() }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <input
+          v-model="search"
+          placeholder="Search by stock name..."
+          class="w-full px-3 py-2 text-sm border rounded
+                 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
       <!-- Loading -->
       <div v-if="loading" class="p-4 text-sm text-gray-500">
-        Loading stocks...
+        Loading history...
       </div>
 
       <!-- Error -->
@@ -241,78 +476,85 @@ const tab2 = {
         {{ error }}
       </div>
 
-      <!-- Stock list -->
-      <div v-else>
+      <!-- History list -->
+      <div v-else class="p-2 space-y-2">
+
         <div
-          v-for="stock in stocks"
-          :key="stock.name"
-          class="w-full px-4 py-3 border-b border-gray-200 hover:bg-gray-50 transition text-xs text-gray-700"
+          v-for="(row, idx) in filteredRows"
+          :key="idx"
+          class="px-4 py-3 border rounded bg-white text-sm"
         >
+          <div class="grid grid-cols-8 gap-6">
 
-          <!-- Header -->
-          <div class="flex justify-between items-center">
-            <span class="text-sm font-semibold text-gray-900">
-              {{ stock.name }}
-            </span>
-            <span class="text-sm font-semibold text-gray-900">
-              ₹{{ stock.price }}
-            </span>
+            <div>
+              <div class="text-xs text-gray-500">Name</div>
+              <div class="font-semibold">{{ row.name }}</div>
+            </div>
+
+            <div>
+              <div class="text-xs text-gray-500">Buy Date</div>
+              <div>{{ row.buy_date }}</div>
+            </div>
+
+            <div>
+              <div class="text-xs text-gray-500">Buy Price</div>
+              <div>₹{{ row.buy_price }}</div>
+            </div>
+
+            <div>
+              <div class="text-xs text-gray-500">Amount</div>
+              <div>{{ row.amt }}</div>
+            </div>
+
+            <div>
+              <div class="text-xs text-gray-500">Total Buy</div>
+              <div class="font-semibold">
+                ₹{{ totalBuyRow(row).toLocaleString() }}
+              </div>
+            </div>
+
+            <div>
+              <div class="text-xs text-gray-500">Sell Date</div>
+              <div>
+                {{ row.sell_price === null ? "—" : row.sell_price }}
+              </div>
+            </div>
+
+            <div>
+              <div class="text-xs text-gray-500">Duration (days)</div>
+              <div>
+                {{ row.duration === null ? "—" : row.duration }}
+              </div>
+            </div>
+
+            <div>
+              <div class="text-xs text-gray-500">Profit</div>
+              <div
+                :class="row.profit > 0
+                  ? 'text-green-600 font-semibold'
+                  : row.profit < 0
+                    ? 'text-red-600 font-semibold'
+                    : 'text-gray-400'"
+              >
+                {{ row.profit === null ? "—" : "₹" + row.profit }}
+              </div>
+            </div>
+
           </div>
-
-          <!-- Core ratios -->
-          <div class="grid grid-cols-4 gap-x-4 mt-1">
-            <span>PE <b class="text-gray-900">{{ stock.pe }}</b></span>
-            <span>Book <b class="text-gray-900">₹{{ stock.book }}</b></span>
-            <span>ROE <b class="text-gray-900">{{ stock.roe }}%</b></span>
-            <span>ROCE <b class="text-gray-900">{{ stock.roce }}%</b></span>
-          </div>
-
-          <!-- High / Low / Deviation -->
-          <div class="grid grid-cols-4 gap-x-4 mt-1">
-            <span>High <b class="text-gray-900">₹{{ stock.high }}</b></span>
-            <span>Low <b class="text-gray-900">₹{{ stock.low }}</b></span>
-            <span>Dev <b class="text-gray-900">{{ stock.deviation }}</b></span>
-            <span>
-              Tag
-              <b :class="stock.tag < 0 ? 'text-red-600' : 'text-green-600'">
-                {{ stock.tag }}
-              </b>
-            </span>
-          </div>
-
-          <!-- Quarterly -->
-          <div class="grid grid-cols-4 gap-x-4 mt-1">
-            <span>
-              Sales Q
-              <b class="text-gray-900">₹{{ stock.sales_qtr.toLocaleString() }}</b>
-            </span>
-            <span>
-              Profit Q
-              <b class="text-gray-900">₹{{ stock.np_qtr.toLocaleString() }}</b>
-            </span>
-            <span>
-              Sales QoQ
-              <b class="text-gray-900">{{ stock.qtr_sales_var }}%</b>
-            </span>
-            <span>
-              Profit QoQ
-              <b class="text-gray-900">{{ stock.qtr_profit_var }}%</b>
-            </span>
-          </div>
-
-          <!-- Market cap -->
-          <div class="mt-1 text-gray-500">
-            Market Cap ₹{{ stock.market_cap.toLocaleString() }}
-          </div>
-
         </div>
-      </div>
 
+      </div>
     </div>
   `
 };
 
+
+
+
+
 const app = Vue.createApp({});
 app.component("tab", tab);
 app.component("tab2", tab2);
+app.component("tab3", tab3);
 app.mount("#app");
+
