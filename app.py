@@ -97,6 +97,10 @@ app = Flask(__name__)
 
 @app.route("/", methods=["GET","POST"])
 def home():
+    return render_template("index.html")
+
+@app.route("/data", methods=["GET","POST"])
+def all_data():
     global data
     return jsonify(data)
 
@@ -323,5 +327,6 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
