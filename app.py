@@ -92,7 +92,7 @@ def alert(name, action):
         smtp.send_message(msg)
 
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='.', static_folder='static')
 
 
 @app.route("/", methods=["GET","POST"])
@@ -327,6 +327,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
