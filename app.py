@@ -298,7 +298,7 @@ def buy():
     c.execute(
         '''
         INSERT INTO Buy (name, price, amt) VALUES (?,?,?)
-        ''', (query, data[index[query]]['price'], int(num))
+        ''', (query, data[index[query]]['price'] if price=="-1" else float(price), int(num))
     )
     id = c.lastrowid
     conn.commit()
@@ -414,6 +414,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
