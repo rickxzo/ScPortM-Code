@@ -228,6 +228,7 @@ const tab = {
             <span>High <b>₹{{ stock.high }}</b></span>
             <span>Low <b>₹{{ stock.low }}</b></span>
             <span>Dev <b>{{ stock.deviation }}</b></span>
+            <span>Holdings <b>{{ stock.num ?? 0 }}</b></span>
           </div>
 
           <!-- Quarterly -->
