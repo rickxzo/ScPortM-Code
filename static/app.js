@@ -47,7 +47,7 @@ const tab = {
       if (this.boughtMap[stock.name]) return;
 
       const qty = prompt(`Enter quantity to buy for ${stock.name}:`);
-
+      const price = prompt(`Enter price (-1 for current price):`);
       // Cancel or empty
       if (qty === null || qty.trim() === "") {
         alert("Quantity is required.");
@@ -62,7 +62,7 @@ const tab = {
         return;
       }
 
-      fetch(`/buy?q=${encodeURIComponent(stock.name)}&n=${n}`);
+      fetch(`/buy?q=${encodeURIComponent(stock.name)}&n=${n}&p={price}`);
 
       this.boughtMap[stock.name] = true;
 
