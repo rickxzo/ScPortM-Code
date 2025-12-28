@@ -419,9 +419,10 @@ const tab3 = {
           buy_date: r[1],
           buy_price: r[2],
           amt: r[3],
-          sell_price: r[4],
+          sell_date: r[4],
           profit: r[5],
-          duration: r[6]
+          duration: r[6],
+          sell_price: r[7]
         }));
         this.loading = false;
       })
@@ -523,9 +524,9 @@ const tab3 = {
             </div>
 
             <div>
-              <div class="text-xs text-gray-500">Sell Date</div>
+              <div class="text-xs text-gray-500">Sell price</div>
               <div>
-                {{ row.sell_price === null ? "—" : row.sell_price }}
+                ₹{{ row.sell_price === null ? "—" : row.sell_price }}
               </div>
             </div>
 
