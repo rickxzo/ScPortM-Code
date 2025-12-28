@@ -316,7 +316,9 @@ def buy():
         holdings[query] = [[data[index[query]]['price'], id]]
     else:
         holdings[query].append([data[index[query]]['price'], id])
-    
+    for i in data:
+        if i['name'] == query:
+            i['num'] = i.get('num', 0) + 1
     return redirect("/portfolio")
 
 @app.route('/sell', methods=["GET","POST"])
@@ -363,6 +365,9 @@ def sell():
     )
     conn.commit()
     conn.close()
+    for i in data:
+        if i['name'] == query:
+            i['num'] = i.get('num', 0) - 1
     return redirect("/portfolio")
 
 @app.route('/portfolio', methods=["GET","POST"])
@@ -440,6 +445,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
