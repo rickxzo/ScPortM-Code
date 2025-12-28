@@ -43,6 +43,28 @@ const tab = {
   },
 
   methods: {
+
+    newMonitor() {
+      const tinker = prompt("Enter tinker:");
+      if (tinker === null || tinker.trim() === "") {
+        alert("Tinker is required.");
+        return;
+      }
+
+      const id = prompt("Enter id:");
+      if (id === null || id.trim() === "") {
+        alert("ID is required.");
+        return;
+      }
+
+      fetch(`/mk?q=${encodeURIComponent(id)}&tk=${encodeURIComponent(tinker)}`)
+        .catch(err => {
+          alert("Failed to add monitor");
+          console.error(err);
+        });
+    },
+
+    
     buyStock(stock) {
       if (this.boughtMap[stock.name]) return;
 
@@ -101,6 +123,14 @@ const tab = {
 
       <!-- Controls -->
       <div class="flex flex-wrap items-center gap-3 px-4 py-3 bg-white sticky top-0 z-10 border-b">
+
+        <button
+          @click="newMonitor"
+          class="px-3 py-1.5 text-sm font-semibold rounded
+                bg-blue-600 text-white hover:bg-blue-700 transition"
+        >
+          New monitor
+        </button>   
 
         <!-- Sort -->
         <div class="flex items-center gap-2">
