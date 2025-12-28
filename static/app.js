@@ -45,15 +45,15 @@ const tab = {
   methods: {
 
     newMonitor() {
-      const tinker = prompt("Enter tinker:");
+      const tinker = prompt("Enter ID:");
       if (tinker === null || tinker.trim() === "") {
-        alert("Tinker is required.");
+        alert("ID is required.");
         return;
       }
 
-      const id = prompt("Enter id:");
+      const id = prompt("Enter Tinker:");
       if (id === null || id.trim() === "") {
-        alert("ID is required.");
+        alert("Tinker is required.");
         return;
       }
 
