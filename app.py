@@ -7,6 +7,11 @@ from collections import defaultdict
 import os
 import sqlite3
 from datetime import datetime, timedelta
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 def connect_db():
     conn = sqlite3.connect('db.db')
@@ -33,12 +38,13 @@ def init():
     global index
     global data
     for i in tags.keys():
-        sleep(3)
+        sleep(10)
         d = {}
         url = f"https://www.screener.in/company/{i}/consolidated"
         d["name"] = i
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
+        logger.info(soup)
         div = soup.find('ul', {'id': 'top-ratios'})
         print(i)
         nums = div.find_all('span', {'class': 'number'})
@@ -137,6 +143,7 @@ def update():
     global holdings
     global k
     for i in tags.keys():
+        sleep(10)
         url = f"https://www.screener.in/company/{i}/consolidated"
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -180,7 +187,7 @@ def background():
     global index
     global data
     for i in tags.keys():
-        sleep(1)
+        sleep(10)
         url = f"https://www.screener.in/company/{i}/consolidated"
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -463,6 +470,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
