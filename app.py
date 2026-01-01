@@ -54,7 +54,7 @@ def init():
         
             except requests.exceptions.RequestException as e:
                 logger.info(f"Request failed: {e}. Retrying in 5s...")
-                time.sleep(5)
+                time.sleep(10)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         print(i)
@@ -93,7 +93,7 @@ def init():
         
             except requests.exceptions.RequestException as e:
                 logger.info(f"Request failed: {e}. Retrying in 5s...")
-                time.sleep(5)
+                time.sleep(10)
         soup = BeautifulSoup(response.text, 'html.parser')
         rows = soup.find_all("tr", attrs={"data-row-company-id": True})
         for j in rows:
@@ -180,7 +180,7 @@ def update():
         
             except requests.exceptions.RequestException as e:
                 print(f"Request failed: {e}. Retrying in 5s...")
-                time.sleep(5)
+                time.sleep(10)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         nums = div.find_all('span', {'class': 'number'})
@@ -269,7 +269,7 @@ def background():
         
             except requests.exceptions.RequestException as e:
                 logger.info(f"Request failed: {e}. Retrying in 5s...")
-                time.sleep(5)
+                time.sleep(10)
         soup = BeautifulSoup(response.text, 'html.parser')
         rows = soup.find_all("tr", attrs={"data-row-company-id": True})
         for j in rows:
@@ -553,6 +553,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
