@@ -186,7 +186,7 @@ def update():
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         nums = div.find_all('span', {'class': 'number'})
-        price = int("".join(str(nums[1]).split("</")[0][21:].split(",")))
+        price = float("".join(str(nums[1]).split("</")[0][21:].split(",")))
         data[index[i]]["price"] = price
         div1 = soup.find('span', {'class': 'font-size-12 down margin-left-4'})
         div2 = soup.find('span', {'class': 'font-size-12 up margin-left-4'})
@@ -555,6 +555,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
