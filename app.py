@@ -37,7 +37,7 @@ def init():
     global index
     global data
     for i in tags.keys():
-        sleep(10)
+        sleep(15)
         d = {}
         url = f"https://www.screener.in/company/{i}/consolidated"
         logger.info(i)
@@ -54,7 +54,7 @@ def init():
         
             except requests.exceptions.RequestException as e:
                 logger.info(f"Request failed: {e}. Retrying in 5s...")
-                time.sleep(10)
+                time.sleep(15)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         print(i)
@@ -166,7 +166,7 @@ def update():
     global holdings
     global k
     for i in tags.keys():
-        sleep(10)
+        sleep(15)
         url = f"https://www.screener.in/company/{i}/consolidated"
         while True:
             try:
@@ -180,7 +180,7 @@ def update():
         
             except requests.exceptions.RequestException as e:
                 print(f"Request failed: {e}. Retrying in 5s...")
-                time.sleep(10)
+                time.sleep(15)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         nums = div.find_all('span', {'class': 'number'})
@@ -350,7 +350,7 @@ def mk():
     
         except requests.exceptions.RequestException as e:
             logger.info(f"Request failed: {e}. Retrying in 5s...")
-            time.sleep(5)
+            time.sleep(15)
     soup = BeautifulSoup(response.text, 'html.parser')
     rows = soup.find_all("tr", attrs={"data-row-company-id": True})
     for j in rows:
@@ -538,7 +538,7 @@ def hide():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=update, trigger="interval", minutes=1)
+scheduler.add_job(func=update, trigger="interval", minutes=15)
 scheduler.add_job(
     func=background,
     trigger="cron",
@@ -553,6 +553,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
