@@ -81,6 +81,8 @@ def init():
 
         data.append(d)
         index[i] = len(data)-1
+        with open("index.txt", "w") as f:
+            f.write(index)
     print("Data uploaded")
 
 init()
@@ -153,6 +155,8 @@ def update():
                     alert(i, "Buy", j[1])
                 elif j[0] * (1-k) > price:
                     alert(i, "Sell", j[1])
+        with open("holdings.txt", "w") as f:
+            f.write(holdings)
     return "done"
 
 @app.route("/background", methods=["GET","POST"])
@@ -261,7 +265,11 @@ def mk():
     
     tags[query] = tk
     index[query] = len(data) - 1
-    
+    with open("tags.txt", "w") as f:
+            f.write(tags)
+
+    with open("index.txt", "w") as f:
+            f.write(index)
     return "done"
 
 @app.route("/rm", methods=["GET","POST"])
@@ -278,6 +286,8 @@ def rm():
 
     data.pop(n)
     tags.pop(query)
+    with open("tags.txt", "w") as f:
+            f.write(tags)
     return "done"
     
 @app.route("/ck", methods=["GET", "POST"])
@@ -287,6 +297,8 @@ def ck():
     if query == "NC":
         return str(k)
     k = float(query)
+    with open("k.txt", "w") as f:
+            f.write(k)
     return f"done : {k}"
 
 @app.route("/buy", methods=["GET","POST"])
@@ -319,6 +331,8 @@ def buy():
     for i in data:
         if i['name'] == query:
             i['num'] = i.get('num', 0) + 1
+    with open("holdings.txt", "w") as f:
+            f.write(holdings)
     return redirect("/portfolio")
 
 @app.route('/sell', methods=["GET","POST"])
@@ -368,6 +382,8 @@ def sell():
     for i in data:
         if i['name'] == query:
             i['num'] = i.get('num', 0) - 1
+    with open("holdings.txt", "w") as f:
+            f.write(holdings)
     return redirect("/portfolio")
 
 @app.route('/portfolio', methods=["GET","POST"])
@@ -393,6 +409,8 @@ def holding():
     rows = c.fetchall()
     print(rows)
     conn.close()
+    with open("holdings.txt", "w") as f:
+            f.write(holdings)
     return jsonify(rows)
 
 @app.route('/history', methods=["GET","POST"])
@@ -446,6 +464,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
