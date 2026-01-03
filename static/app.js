@@ -233,14 +233,14 @@ const tab = {
 
           <!-- Quarterly -->
           <div class="grid grid-cols-4 gap-4 mt-1">
-            <span>Sales Q <b>₹{{ stock.sales_qtr.toLocaleString() }}</b></span>
-            <span>Profit Q <b>₹{{ stock.np_qtr.toLocaleString() }}</b></span>
-            <span>Sales QoQ <b>{{ stock.qtr_sales_var }}%</b></span>
-            <span>Profit QoQ <b>{{ stock.qtr_profit_var }}%</b></span>
+            <span>Sales Q <b>₹{{ stock.sales_qtr?.toLocaleString() }}</b></span>
+            <span>Profit Q <b>₹{{ stock.np_qtr?.toLocaleString() }}</b></span>
+            <span>Sales QoQ <b>{{ stock.qtr_sales_var ?? 0 }}%</b></span>
+            <span>Profit QoQ <b>{{ stock.qtr_profit_var ?? 0 }}%</b></span>
           </div>
 
           <div class="mt-1 text-gray-500">
-            Market Cap ₹{{ stock.market_cap.toLocaleString() }}
+            Market Cap ₹{{ stock.market_cap?.toLocaleString() }}
           </div>
         </div>
       </div>
