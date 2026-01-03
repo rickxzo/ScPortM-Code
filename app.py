@@ -53,13 +53,20 @@ def init():
                     # success → break loop
                     break
             
+                except requests.exceptions.HTTPError as e:
+                    status = e.response.status_code
+            
+                    if status == 404:
+                        logger.info(f"404 Not Found → {url}")
+                        return "error"   # do NOT retry
+            
+                    logger.info(f"HTTP {status}. Retrying in 60s...")
+                    time.sleep(60)
+            
                 except requests.exceptions.RequestException as e:
-                    if str(e)[:3] == "404":
-                        logger.info("Wrong url error 58")
-                        return "error"
-                    else:
-                        logger.info(f"Request failed: {e}. Retrying in 30s...")
-                        time.sleep(60)
+                    # timeout, DNS, connection reset, etc.
+                    logger.info(f"Network error: {e}. Retrying in 60s...")
+                    time.sleep(60)
             soup = BeautifulSoup(response.text, 'html.parser')
             div = soup.find('ul', {'id': 'top-ratios'})
             print(i)
@@ -96,13 +103,20 @@ def init():
             
                     break
             
+                except requests.exceptions.HTTPError as e:
+                    status = e.response.status_code
+            
+                    if status == 404:
+                        logger.info(f"404 Not Found → {url}")
+                        return "error"   # do NOT retry
+            
+                    logger.info(f"HTTP {status}. Retrying in 60s...")
+                    time.sleep(60)
+            
                 except requests.exceptions.RequestException as e:
-                    if str(e)[:3] == "404":
-                        logger.info("Wrong url error 58")
-                        return "error"
-                    else:
-                        logger.info(f"Request failed: {e}. Retrying in 30s...")
-                        time.sleep(60)
+                    # timeout, DNS, connection reset, etc.
+                    logger.info(f"Network error: {e}. Retrying in 60s...")
+                    time.sleep(60)
             soup = BeautifulSoup(response.text, 'html.parser')
             rows = soup.find_all("tr", attrs={"data-row-company-id": True})
             for j in rows:
@@ -193,13 +207,20 @@ def update():
                     # success → break loop
                     break
             
+                except requests.exceptions.HTTPError as e:
+                    status = e.response.status_code
+            
+                    if status == 404:
+                        logger.info(f"404 Not Found → {url}")
+                        return "error"   # do NOT retry
+            
+                    logger.info(f"HTTP {status}. Retrying in 60s...")
+                    time.sleep(60)
+
                 except requests.exceptions.RequestException as e:
-                    if str(e)[:3] == "404":
-                        logger.info("Wrong url error 58")
-                        return "error"
-                    else:
-                        logger.info(f"Request failed: {e}. Retrying in 30s...")
-                        time.sleep(60)
+                    # timeout, DNS, connection reset, etc.
+                    logger.info(f"Network error: {e}. Retrying in 60s...")
+                    time.sleep(60)
             soup = BeautifulSoup(response.text, 'html.parser')
             div = soup.find('ul', {'id': 'top-ratios'})
             nums = div.find_all('span', {'class': 'number'})
@@ -258,13 +279,20 @@ def background():
                     # success → break loop
                     break
             
+                except requests.exceptions.HTTPError as e:
+                    status = e.response.status_code
+            
+                    if status == 404:
+                        logger.info(f"404 Not Found → {url}")
+                        return "error"   # do NOT retry
+            
+                    logger.info(f"HTTP {status}. Retrying in 60s...")
+                    time.sleep(60)
+            
                 except requests.exceptions.RequestException as e:
-                    if str(e)[:3] == "404":
-                        logger.info("Wrong url error 58")
-                        return "error"
-                    else:
-                        logger.info(f"Request failed: {e}. Retrying in 30s...")
-                        time.sleep(60)
+                    # timeout, DNS, connection reset, etc.
+                    logger.info(f"Network error: {e}. Retrying in 60s...")
+                    time.sleep(60)
             soup = BeautifulSoup(response.text, 'html.parser')
             div = soup.find('ul', {'id': 'top-ratios'})
             nums = div.find_all('span', {'class': 'number'})
@@ -295,13 +323,20 @@ def background():
                     # success → break loop
                     break
             
+                except requests.exceptions.HTTPError as e:
+                    status = e.response.status_code
+            
+                    if status == 404:
+                        logger.info(f"404 Not Found → {url}")
+                        return "error"   # do NOT retry
+            
+                    logger.info(f"HTTP {status}. Retrying in 60s...")
+                    time.sleep(60)
+            
                 except requests.exceptions.RequestException as e:
-                    if str(e)[:3] == "404":
-                        logger.info("Wrong url error 58")
-                        return "error"
-                    else:
-                        logger.info(f"Request failed: {e}. Retrying in 30s...")
-                        time.sleep(60)
+                    # timeout, DNS, connection reset, etc.
+                    logger.info(f"Network error: {e}. Retrying in 60s...")
+                    time.sleep(60)
             soup = BeautifulSoup(response.text, 'html.parser')
             rows = soup.find_all("tr", attrs={"data-row-company-id": True})
             for j in rows:
@@ -342,13 +377,20 @@ def mk():
                 # success → break loop
                 break
         
+            except requests.exceptions.HTTPError as e:
+                status = e.response.status_code
+        
+                if status == 404:
+                    logger.info(f"404 Not Found → {url}")
+                    return "error"   # do NOT retry
+        
+                logger.info(f"HTTP {status}. Retrying in 60s...")
+                time.sleep(60)
+        
             except requests.exceptions.RequestException as e:
-                if str(e)[:3] == "404":
-                    logger.info("Wrong url error 58")
-                    return "error"
-                else:
-                    logger.info(f"Request failed: {e}. Retrying in 30s...")
-                    time.sleep(60)
+                # timeout, DNS, connection reset, etc.
+                logger.info(f"Network error: {e}. Retrying in 60s...")
+                time.sleep(60)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         nums = div.find_all('span', {'class': 'number'})
@@ -383,13 +425,20 @@ def mk():
                 # success → break loop
                 break
         
+            except requests.exceptions.HTTPError as e:
+                status = e.response.status_code
+        
+                if status == 404:
+                    logger.info(f"404 Not Found → {url}")
+                    return "error"   # do NOT retry
+        
+                logger.info(f"HTTP {status}. Retrying in 60s...")
+                time.sleep(60)
+        
             except requests.exceptions.RequestException as e:
-                if str(e)[:3] == "404":
-                    logger.info("Wrong url error 58")
-                    return "error"
-                else:
-                    logger.info(f"Request failed: {e}. Retrying in 30s...")
-                    time.sleep(60)
+                # timeout, DNS, connection reset, etc.
+                logger.info(f"Network error: {e}. Retrying in 60s...")
+                time.sleep(60)
         soup = BeautifulSoup(response.text, 'html.parser')
         rows = soup.find_all("tr", attrs={"data-row-company-id": True})
         for j in rows:
@@ -623,6 +672,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
