@@ -384,17 +384,6 @@ def mk():
                 break
         
             except requests.exceptions.RequestException as e:
-                while True:
-            try:
-                response = requests.get(url, timeout=10)
-                response.raise_for_status()  # catches 4xx / 5xx
-        
-                soup = BeautifulSoup(response.text, 'html.parser')
-        
-                # success → break loop
-                break
-        
-            except requests.exceptions.RequestException as e:
                 if str(e)[:3] == "404":
                     logger.info("Wrong url error 58")
                     return "error"
@@ -634,6 +623,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
