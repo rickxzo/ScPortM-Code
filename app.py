@@ -38,7 +38,7 @@ def init():
         global index
         global data
         for i in tags.keys():
-            sleep(15)
+            sleep(10)
             d = {}
             url = f"https://www.screener.in/company/{i}/consolidated"
             logger.info(i)
@@ -54,8 +54,8 @@ def init():
                     break
             
                 except requests.exceptions.RequestException as e:
-                    logger.info(f"Request failed: {e}. Retrying in 5s...")
-                    time.sleep(15)
+                    logger.info(f"Request failed: {e}. Retrying in 30s...")
+                    time.sleep(60)
             soup = BeautifulSoup(response.text, 'html.parser')
             div = soup.find('ul', {'id': 'top-ratios'})
             print(i)
@@ -93,8 +93,8 @@ def init():
                     break
             
                 except requests.exceptions.RequestException as e:
-                    logger.info(f"Request failed: {e}. Retrying in 5s...")
-                    time.sleep(10)
+                    logger.info(f"Request failed: {e}. Retrying in 30s...")
+                    time.sleep(30)
             soup = BeautifulSoup(response.text, 'html.parser')
             rows = soup.find_all("tr", attrs={"data-row-company-id": True})
             for j in rows:
@@ -111,9 +111,9 @@ def init():
     
             data.append(d)
             index[i] = len(data)-1
-        print("Data uploaded")
+        logger.info("Data uploaded 114")
     except Exception as e:
-        print("Error")
+        logger.info("Error 116")
 
 init()
 
@@ -129,7 +129,9 @@ def alert(name, action, id):
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login('nk1804417@gmail.com', 'ootd rwtk hxyh ygod')
             smtp.send_message(msg)
+        logger.info("Success 132")
     except Exception as e:
+        logger.info("Error 134")
         return "error"
 
 
@@ -171,7 +173,7 @@ def update():
         global holdings
         global k
         for i in tags.keys():
-            sleep(15)
+            sleep(10)
             url = f"https://www.screener.in/company/{i}/consolidated"
             while True:
                 try:
@@ -184,8 +186,8 @@ def update():
                     break
             
                 except requests.exceptions.RequestException as e:
-                    print(f"Request failed: {e}. Retrying in 5s...")
-                    time.sleep(15)
+                    print(f"Request failed: {e}. Retrying in 60s...")
+                    time.sleep(60)
             soup = BeautifulSoup(response.text, 'html.parser')
             div = soup.find('ul', {'id': 'top-ratios'})
             nums = div.find_all('span', {'class': 'number'})
@@ -218,8 +220,10 @@ def update():
                         alert(i, "Buy", j[1])
                     elif j[0] * (1-k) > price:
                         alert(i, "Sell", j[1])
+        logger.info("Success 223")
         return "done"
     except Exception as e:
+        logger.info("Error 226")
         return "error"
 
 @app.route("/background", methods=["GET","POST"])
@@ -243,8 +247,8 @@ def background():
                     break
             
                 except requests.exceptions.RequestException as e:
-                    logger.info(f"Request failed: {e}. Retrying in 5s...")
-                    time.sleep(5)
+                    logger.info(f"Request failed: {e}. Retrying in 60s...")
+                    time.sleep(60)
             soup = BeautifulSoup(response.text, 'html.parser')
             div = soup.find('ul', {'id': 'top-ratios'})
             nums = div.find_all('span', {'class': 'number'})
@@ -294,6 +298,7 @@ def background():
     
         return "done"
     except Exception as e:
+        logger.info("Error 301")
         return "error"
 
 @app.route("/mk", methods=["GET","POST"])
@@ -318,8 +323,8 @@ def mk():
                 break
         
             except requests.exceptions.RequestException as e:
-                logger.info(f"Request failed: {e}. Retrying in 5s...")
-                time.sleep(5)
+                logger.info(f"Request failed: {e}. Retrying in 60s...")
+                time.sleep(60)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         nums = div.find_all('span', {'class': 'number'})
@@ -356,7 +361,7 @@ def mk():
         
             except requests.exceptions.RequestException as e:
                 logger.info(f"Request failed: {e}. Retrying in 5s...")
-                time.sleep(15)
+                time.sleep(60)
         soup = BeautifulSoup(response.text, 'html.parser')
         rows = soup.find_all("tr", attrs={"data-row-company-id": True})
         for j in rows:
@@ -377,6 +382,7 @@ def mk():
         index[query] = len(data) - 1
         return "done"
     except Exception as e:
+        logger.info("Error 385")
         return "error"
 
 @app.route("/rm", methods=["GET","POST"])
@@ -396,16 +402,21 @@ def rm():
         tags.pop(query)
         return "done"
     except Exception as e:
+        logger.info("Error 405")
         return "error"
     
 @app.route("/ck", methods=["GET", "POST"])
 def ck():
-    query = request.args.get('q')
-    global k
-    if query == "NC":
-        return str(k)
-    k = float(query)
-    return f"done : {k}"
+    try:
+        query = request.args.get('q')
+        global k
+        if query == "NC":
+            return str(k)
+        k = float(query)
+        return f"done : {k}"
+    except Exception as e:
+        logger.info("Error 418")
+        return "error"
 
 @app.route("/buy", methods=["GET","POST"])
 def buy():
@@ -440,6 +451,7 @@ def buy():
                 i['num'] = i.get('num', 0) + 1
         return redirect("/portfolio")
     except Exception as e:
+        logger.info("Error 450")
         return "error"
 
 @app.route('/sell', methods=["GET","POST"])
@@ -492,6 +504,7 @@ def sell():
                 i['num'] = i.get('num', 0) - 1
         return redirect("/portfolio")
     except Exception as e:
+        logger.info("Error 503")
         return "error"
 
 @app.route('/portfolio', methods=["GET","POST"])
@@ -520,6 +533,7 @@ def holding():
         conn.close()
         return jsonify(rows)
     except Exception as e:
+        logger.info("Error 532")
         return "error"
 
 @app.route('/history', methods=["GET","POST"])
@@ -544,6 +558,7 @@ def history():
         conn.close()
         return jsonify(rows)
     except Exception as e:
+        logger.info("Error 557")
         return "error"
 
 @app.route('/hide', methods=["GET","POST"])
@@ -560,6 +575,7 @@ def hide():
         conn.close()
         return redirect("/history")
     except Exception as e:
+        logger.info("Error 574")
         return "error"
 
 
@@ -579,6 +595,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
