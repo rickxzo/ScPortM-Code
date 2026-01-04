@@ -392,8 +392,8 @@ def mk():
                 logger.info(f"Network error: {e}. Retrying in 60s...")
                 time.sleep(60)
         soup = BeautifulSoup(response.text, 'html.parser')
-        logger.info(soup)
         div = soup.find('ul', {'id': 'top-ratios'})
+        logger.info(div)
         nums = div.find_all('span', {'class': 'number'})
         cap = int("".join(str(nums[0]).split("</")[0][21:].split(",")))
         d["market_cap"] = cap
@@ -673,6 +673,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
