@@ -32,6 +32,7 @@ holdings = defaultdict(list)
 
 from flask import Flask, jsonify, request, redirect, url_for, render_template
 
+
 def init():
     global tags
     global index
@@ -205,6 +206,7 @@ def alert(name, action, id):
 
 
 app = Flask(__name__, template_folder='.', static_folder='static')
+app.secret_key = "something"
 
 
 @app.route("/", methods=["GET","POST"])
@@ -786,6 +788,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
