@@ -459,7 +459,7 @@ def mk():
         index[query] = len(data) - 1
         return "done"
     except Exception as e:
-        logger.info("Error 385")
+        logger.info(f"Error 385 {e}")
         return "error"
 
 @app.route("/rm", methods=["GET","POST"])
@@ -672,6 +672,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
