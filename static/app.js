@@ -186,7 +186,7 @@ const tab = {
           <!-- Header -->
           <div class="flex justify-between items-center">
             <div>
-                <div class="text-sm font-semibold">{{ stock.name }}</div>
+                <div class="text-sm font-semibold">{{ stock.alias || stock.name }}</div>
                 <div class="text-sm font-semibold">₹{{ stock.price }}</div>
             </div>
 
