@@ -33,94 +33,126 @@ holdings = defaultdict(list)
 from flask import Flask, jsonify, request, redirect, url_for, render_template
 
 def init():
-    try:
-        global tags
-        global index
-        global data
-        for i in tags.keys():
-            sleep(10)
-            d = {}
-            url = f"https://www.screener.in/company/{i}/consolidated"
-            logger.info(i)
-            d["name"] = i
-            while True:
-                try:
-                    response = requests.get(url, timeout=10)
-                    response.raise_for_status()  # catches 4xx / 5xx
-            
-                    soup = BeautifulSoup(response.text, 'html.parser')
-            
-                    # success → break loop
-                    break
-            
-                except requests.exceptions.HTTPError as e:
-                    status = e.response.status_code
-            
-                    if status == 404:
-                        logger.info(f"404 Not Found → {url}")
-                        return "error"   # do NOT retry
-            
-                    logger.info(f"HTTP {status}. Retrying in 60s...")
-                    time.sleep(60)
-            
-                except requests.exceptions.RequestException as e:
-                    # timeout, DNS, connection reset, etc.
-                    logger.info(f"Network error: {e}. Retrying in 60s...")
-                    time.sleep(60)
+    global tags
+    global index
+    global data
+    for i in tags.keys():
+        sleep(10)
+        d = {}
+        url = f"https://www.screener.in/company/{i}/consolidated"
+        logger.info(i)
+        d["name"] = i
+        while True:
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()  # catches 4xx / 5xx
+        
+                soup = BeautifulSoup(response.text, 'html.parser')
+        
+                # success → break loop
+                break
+        
+            except requests.exceptions.HTTPError as e:
+                status = e.response.status_code
+        
+                if status == 404:
+                    logger.info(f"404 Not Found → {url}")
+                    return "error"   # do NOT retry
+        
+                logger.info(f"HTTP {status}. Retrying in 60s...")
+                time.sleep(60)
+        
+            except requests.exceptions.RequestException as e:
+                # timeout, DNS, connection reset, etc.
+                logger.info(f"Network error: {e}. Retrying in 60s...")
+                time.sleep(60)
+        try:
             soup = BeautifulSoup(response.text, 'html.parser')
             div = soup.find('ul', {'id': 'top-ratios'})
-            print(i)
+        except Exception as e:
+            logger.into(f"73err {e}")
+        try:
             nums = div.find_all('span', {'class': 'number'})
+        except Exception as e:
+            logger.into(e)
+        try:
             cap = int("".join(str(nums[0]).split("</")[0][21:].split(",")))
             d["market_cap"] = cap
+        except Exception as e:
+            logger.into(f"79err {e}")
+        try:
             price = float("".join(str(nums[1]).split("</")[0][21:].split(",")))
             d["price"] = price
+        except Exception as e:
+            logger.into(f"84err {e}")
+        try:
             high = float("".join(str(nums[2]).split("</")[0][21:].split(",")))
             d["high"] = high
+        except Exception as e:
+            logger.into(f"89err {e}")
+        try:
             low = float("".join(str(nums[3]).split("</")[0][21:].split(",")))
             d["low"] = low
+        except Exception as e:
+            logger.into(f"94err {e}")
+        try:
             pe = float("".join(str(nums[4]).split("</")[0][21:].split(",")))
             d["pe"] = pe
+        except Exception as e:
+            logger.into(f"99err {e}")
+        try:
             book = float("".join(str(nums[5]).split("</")[0][21:].split(","))) if str(nums[5]).split("</")[0][21:]!="" else 0
             d["book"] = book 
+        except Exception as e:
+            logger.into(f"104err {e}")
+        try:
             roce = float("".join(str(nums[7]).split("</")[0][21:].split(",")))
             d["roce"] = roce
+        except Exception as e:
+            logger.into(f"109err {e}")
+        try:
             roe = float("".join(str(nums[8]).split("</")[0][21:].split(",")))
             d["roe"] = roe
+        except Exception as e:
+            logger.into(f"114err {e}")
+        try:
             div1 = soup.find('span', {'class': 'font-size-12 down margin-left-4'})
             div2 = soup.find('span', {'class': 'font-size-12 up margin-left-4'})
             dev = str(div1 if div1 is not None else div2)[90:].split("</")[0].strip()[:-1]
             d["deviation"] = float(dev)
-    
-            
-            url = f"https://www.screener.in/api/company/{tags[i]}/peers"
-            while True:
+        except Exception as e:
+            logger.into(f"121err {e}")
+
+        
+        url = f"https://www.screener.in/api/company/{tags[i]}/peers"
+        while True:
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()  # catches 4xx / 5xx
+        
+                soup = BeautifulSoup(response.text, 'html.parser')
+        
+                break
+        
+            except requests.exceptions.HTTPError as e:
+                status = e.response.status_code
+        
+                if status == 404:
+                    logger.info(f"404 Not Found → {url}")
+                    return "error"   # do NOT retry
+        
+                logger.info(f"HTTP {status}. Retrying in 60s...")
+                time.sleep(60)
+        
+            except requests.exceptions.RequestException as e:
+                # timeout, DNS, connection reset, etc.
+                logger.info(f"Network error: {e}. Retrying in 60s...")
+                time.sleep(60)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        rows = soup.find_all("tr", attrs={"data-row-company-id": True})
+        for j in rows:
+            if i in str(j):
                 try:
-                    response = requests.get(url, timeout=10)
-                    response.raise_for_status()  # catches 4xx / 5xx
-            
-                    soup = BeautifulSoup(response.text, 'html.parser')
-            
-                    break
-            
-                except requests.exceptions.HTTPError as e:
-                    status = e.response.status_code
-            
-                    if status == 404:
-                        logger.info(f"404 Not Found → {url}")
-                        return "error"   # do NOT retry
-            
-                    logger.info(f"HTTP {status}. Retrying in 60s...")
-                    time.sleep(60)
-            
-                except requests.exceptions.RequestException as e:
-                    # timeout, DNS, connection reset, etc.
-                    logger.info(f"Network error: {e}. Retrying in 60s...")
-                    time.sleep(60)
-            soup = BeautifulSoup(response.text, 'html.parser')
-            rows = soup.find_all("tr", attrs={"data-row-company-id": True})
-            for j in rows:
-                if i in str(j):
                     table = str(j).split("\n")[5].split("</td>")
                     npqtr = float(table[4][4:])
                     qtrpv = float(table[5][4:])
@@ -130,12 +162,14 @@ def init():
                     d["qtr_profit_var"] = qtrpv
                     d["sales_qtr"] = sqtr
                     d["qtr_sales_var"] = qtrsv
-    
+                except Exception as e:
+                    logger.into(f"166err {e}")
+
+        try:
             data.append(d)
             index[i] = len(data)-1
-        logger.info("Data uploaded 114")
-    except Exception as e:
-        logger.info("Error 116")
+        except Exception as e:
+            logger.into(f"172err {e}")
 
 init()
 
@@ -187,50 +221,61 @@ def all_data():
 
 @app.route("/update", methods=["GET","POST"])
 def update():
-    try:
-        print("exec1")
-        global tags
-        global data
-        global index
-        global holdings
-        global k
-        for i in tags.keys():
-            sleep(10)
-            url = f"https://www.screener.in/company/{i}/consolidated"
-            while True:
-                try:
-                    response = requests.get(url, timeout=10)
-                    response.raise_for_status()  # catches 4xx / 5xx
-            
-                    soup = BeautifulSoup(response.text, 'html.parser')
-            
-                    # success → break loop
-                    break
-            
-                except requests.exceptions.HTTPError as e:
-                    status = e.response.status_code
-            
-                    if status == 404:
-                        logger.info(f"404 Not Found → {url}")
-                        return "error"   # do NOT retry
-            
-                    logger.info(f"HTTP {status}. Retrying in 60s...")
-                    time.sleep(60)
+    print("exec1")
+    global tags
+    global data
+    global index
+    global holdings
+    global k
+    for i in tags.keys():
+        sleep(10)
+        url = f"https://www.screener.in/company/{i}/consolidated"
+        while True:
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()  # catches 4xx / 5xx
+        
+                soup = BeautifulSoup(response.text, 'html.parser')
+        
+                # success → break loop
+                break
+        
+            except requests.exceptions.HTTPError as e:
+                status = e.response.status_code
+        
+                if status == 404:
+                    logger.info(f"404 Not Found → {url}")
+                    return "error"   # do NOT retry
+        
+                logger.info(f"HTTP {status}. Retrying in 60s...")
+                time.sleep(60)
 
-                except requests.exceptions.RequestException as e:
-                    # timeout, DNS, connection reset, etc.
-                    logger.info(f"Network error: {e}. Retrying in 60s...")
-                    time.sleep(60)
+            except requests.exceptions.RequestException as e:
+                # timeout, DNS, connection reset, etc.
+                logger.info(f"Network error: {e}. Retrying in 60s...")
+                time.sleep(60)
+
+        try:
             soup = BeautifulSoup(response.text, 'html.parser')
             div = soup.find('ul', {'id': 'top-ratios'})
             nums = div.find_all('span', {'class': 'number'})
+        except Exception as e:
+            logger.into(f"263err {e}")
+
+        try:
             price = float("".join(str(nums[1]).split("</")[0][21:].split(",")))
             data[index[i]]["price"] = price
+        except Exception as e:
+            logger.into(f"269err {e}")
+        try:
             div1 = soup.find('span', {'class': 'font-size-12 down margin-left-4'})
             div2 = soup.find('span', {'class': 'font-size-12 up margin-left-4'})
             dev = str(div1 if div1 is not None else div2)[90:].split("</")[0].strip()[:-1]
             data[index[i]]["deviation"] = float(dev)
-    
+        except Exception as e:
+            logger.into(f"276err {e}")
+
+        try:
             if price <= 0.6 * data[index[i]]["high"]:
                 data[index[i]]["tag"] = 1
     
@@ -239,63 +284,59 @@ def update():
     
             else:
                 data[index[i]]["tag"] = 0
-            '''
-            if i in holdings.keys():
-                if holdings[i][-1] * (1+k) < price:
-                    alert(i, "Buy", 0)
-                elif holdings[i][-1] * (1-k) > price:
-                    alert(i, "Sell", 1)
-    
-            '''
+                
             if i in holdings.keys():
                 for j in holdings[i]:
                     if j[0] * (1+k) < price:
                         alert(i, "Buy", j[1])
                     elif j[0] * (1-k) > price:
                         alert(i, "Sell", j[1])
-        logger.info("Success 223")
-        return "done"
-    except Exception as e:
-        logger.info("Error 226")
-        return "error"
+        except Exception as e:
+            logger.into(f"79err {e}")
+            
+    return "done"
 
 @app.route("/background", methods=["GET","POST"])
 def background():
-    try:
-        print("exec2")
-        global tags
-        global index
-        global data
-        for i in tags.keys():
-            sleep(10)
-            url = f"https://www.screener.in/company/{i}/consolidated"
-            while True:
-                try:
-                    response = requests.get(url, timeout=10)
-                    response.raise_for_status()  # catches 4xx / 5xx
-            
-                    soup = BeautifulSoup(response.text, 'html.parser')
-            
-                    # success → break loop
-                    break
-            
-                except requests.exceptions.HTTPError as e:
-                    status = e.response.status_code
-            
-                    if status == 404:
-                        logger.info(f"404 Not Found → {url}")
-                        return "error"   # do NOT retry
-            
-                    logger.info(f"HTTP {status}. Retrying in 60s...")
-                    time.sleep(60)
-            
-                except requests.exceptions.RequestException as e:
-                    # timeout, DNS, connection reset, etc.
-                    logger.info(f"Network error: {e}. Retrying in 60s...")
-                    time.sleep(60)
+    print("exec2")
+    global tags
+    global index
+    global data
+    for i in tags.keys():
+        sleep(10)
+        url = f"https://www.screener.in/company/{i}/consolidated"
+        while True:
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()  # catches 4xx / 5xx
+        
+                soup = BeautifulSoup(response.text, 'html.parser')
+        
+                # success → break loop
+                break
+        
+            except requests.exceptions.HTTPError as e:
+                status = e.response.status_code
+        
+                if status == 404:
+                    logger.info(f"404 Not Found → {url}")
+                    return "error"   # do NOT retry
+        
+                logger.info(f"HTTP {status}. Retrying in 60s...")
+                time.sleep(60)
+        
+            except requests.exceptions.RequestException as e:
+                # timeout, DNS, connection reset, etc.
+                logger.info(f"Network error: {e}. Retrying in 60s...")
+                time.sleep(60)
+
+        try:
             soup = BeautifulSoup(response.text, 'html.parser')
             div = soup.find('ul', {'id': 'top-ratios'})
             nums = div.find_all('span', {'class': 'number'})
+        except Exception as e:
+            logger.into(f"338err {e}")
+        try:
             cap = int("".join(str(nums[0]).split("</")[0][21:].split(",")))
             high = float("".join(str(nums[2]).split("</")[0][21:].split(",")))
             low = float("".join(str(nums[3]).split("</")[0][21:].split(",")))
@@ -303,7 +344,10 @@ def background():
             book = float("".join(str(nums[5]).split("</")[0][21:].split(","))) if str(nums[5]).split("</")[0][21:]!="" else 0
             roce = float("".join(str(nums[7]).split("</")[0][21:].split(",")))
             roe = float("".join(str(nums[8]).split("</")[0][21:].split(",")))
-            
+        except Exception as e:
+            logger.into(f"348err {e}")
+
+        try:
             data[index[i]]["market_cap"] = cap
             data[index[i]]["high"] = high
             data[index[i]]["low"] = low
@@ -311,32 +355,36 @@ def background():
             data[index[i]]["book"] = book
             data[index[i]]["roce"] = roce
             data[index[i]]["roe"] = roe
-    
-            url = f"https://www.screener.in/api/company/{tags[i]}/peers"
-            while True:
-                try:
-                    response = requests.get(url, timeout=10)
-                    response.raise_for_status()  # catches 4xx / 5xx
-            
-                    soup = BeautifulSoup(response.text, 'html.parser')
-            
-                    # success → break loop
-                    break
-            
-                except requests.exceptions.HTTPError as e:
-                    status = e.response.status_code
-            
-                    if status == 404:
-                        logger.info(f"404 Not Found → {url}")
-                        return "error"   # do NOT retry
-            
-                    logger.info(f"HTTP {status}. Retrying in 60s...")
-                    time.sleep(60)
-            
-                except requests.exceptions.RequestException as e:
-                    # timeout, DNS, connection reset, etc.
-                    logger.info(f"Network error: {e}. Retrying in 60s...")
-                    time.sleep(60)
+        except Exception as e:
+            logger.into(f"359err {e}")
+
+        url = f"https://www.screener.in/api/company/{tags[i]}/peers"
+        while True:
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()  # catches 4xx / 5xx
+        
+                soup = BeautifulSoup(response.text, 'html.parser')
+        
+                # success → break loop
+                break
+        
+            except requests.exceptions.HTTPError as e:
+                status = e.response.status_code
+        
+                if status == 404:
+                    logger.info(f"404 Not Found → {url}")
+                    return "error"   # do NOT retry
+        
+                logger.info(f"HTTP {status}. Retrying in 60s...")
+                time.sleep(60)
+        
+            except requests.exceptions.RequestException as e:
+                # timeout, DNS, connection reset, etc.
+                logger.info(f"Network error: {e}. Retrying in 60s...")
+                time.sleep(60)
+
+        try:
             soup = BeautifulSoup(response.text, 'html.parser')
             rows = soup.find_all("tr", attrs={"data-row-company-id": True})
             for j in rows:
@@ -350,96 +398,127 @@ def background():
                     data[index[i]]["qtr_profit_var"] = qtrpv
                     data[index[i]]["sales_qtr"] = sqtr
                     data[index[i]]["qtr_sales_var"] = qtrsv
-    
-        return "done"
-    except Exception as e:
-        logger.info("Error 301")
-        return "error"
+        except Exception as e:
+            logger.into(f"402err {e}")
+
+    return "done"
 
 @app.route("/mk", methods=["GET","POST"])
 def mk():
+    query = request.args.get('q')
+    tk = request.args.get('tk')
+    global tags
+    global index
+    global data
+    url = f"https://www.screener.in/company/{query}/consolidated"
+    d = {}
+    d["name"] = query
+    while True:
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()  # catches 4xx / 5xx
+    
+            soup = BeautifulSoup(response.text, 'html.parser')
+    
+            # success → break loop
+            break
+    
+        except requests.exceptions.HTTPError as e:
+            status = e.response.status_code
+    
+            if status == 404:
+                logger.info(f"404 Not Found → {url}")
+                return "error"   # do NOT retry
+    
+            logger.info(f"HTTP {status}. Retrying in 60s...")
+            time.sleep(60)
+    
+        except requests.exceptions.RequestException as e:
+            # timeout, DNS, connection reset, etc.
+            logger.info(f"Network error: {e}. Retrying in 60s...")
+            time.sleep(60)
+
     try:
-        query = request.args.get('q')
-        tk = request.args.get('tk')
-        global tags
-        global index
-        global data
-        url = f"https://www.screener.in/company/{query}/consolidated"
-        d = {}
-        d["name"] = query
-        while True:
-            try:
-                response = requests.get(url, timeout=10)
-                response.raise_for_status()  # catches 4xx / 5xx
-        
-                soup = BeautifulSoup(response.text, 'html.parser')
-        
-                # success → break loop
-                break
-        
-            except requests.exceptions.HTTPError as e:
-                status = e.response.status_code
-        
-                if status == 404:
-                    logger.info(f"404 Not Found → {url}")
-                    return "error"   # do NOT retry
-        
-                logger.info(f"HTTP {status}. Retrying in 60s...")
-                time.sleep(60)
-        
-            except requests.exceptions.RequestException as e:
-                # timeout, DNS, connection reset, etc.
-                logger.info(f"Network error: {e}. Retrying in 60s...")
-                time.sleep(60)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         logger.info(div)
         nums = div.find_all('span', {'class': 'number'})
+    except Exception as e:
+        logger.into(f"446err {e}")
+
+    try:
         cap = int("".join(str(nums[0]).split("</")[0][21:].split(",")))
         d["market_cap"] = cap
+    except Exception as e:
+        logger.into(f"453err {e}")
+    try:
         price = float("".join(str(nums[1]).split("</")[0][21:].split(",")))
         d["price"] = price
+    except Exception as e:
+        logger.into(f"458err {e}")
+    try:
         high = float("".join(str(nums[2]).split("</")[0][21:].split(",")))
         d["high"] = high
+    except Exception as e:
+        logger.into(f"463err {e}")
+    try:
         low = float("".join(str(nums[3]).split("</")[0][21:].split(",")))
         d["low"] = low
+    except Exception as e:
+        logger.into(f"468err {e}")
+    try:
         pe = float("".join(str(nums[4]).split("</")[0][21:].split(",")))
         d["pe"] = pe
+    except Exception as e:
+        logger.into(f"473err {e}")
+    try:
         book = float("".join(str(nums[5]).split("</")[0][21:].split(","))) if str(nums[5]).split("</")[0][21:]!="" else 0
         d["book"] = book 
+    except Exception as e:
+        logger.into(f"478err {e}")
+    try:
         roce = float("".join(str(nums[7]).split("</")[0][21:].split(",")))
         d["roce"] = roce
+    except Exception as e:
+        logger.into(f"483err {e}")
+    try:
         roe = float("".join(str(nums[8]).split("</")[0][21:].split(",")))
         d["roe"] = roe
+    except Exception as e:
+        logger.into(f"488err {e}")
+    try:
         div1 = soup.find('span', {'class': 'font-size-12 down margin-left-4'})
         div2 = soup.find('span', {'class': 'font-size-12 up margin-left-4'})
         dev = str(div1 if div1 is not None else div2)[90:].split("</")[0].strip()[:-1]
         d["deviation"] = float(dev)
-        url = f"https://www.screener.in/api/company/{tk}/peers"
-        while True:
-            try:
-                response = requests.get(url, timeout=10)
-                response.raise_for_status()  # catches 4xx / 5xx
-        
-                soup = BeautifulSoup(response.text, 'html.parser')
-        
-                # success → break loop
-                break
-        
-            except requests.exceptions.HTTPError as e:
-                status = e.response.status_code
-        
-                if status == 404:
-                    logger.info(f"404 Not Found → {url}")
-                    return "error"   # do NOT retry
-        
-                logger.info(f"HTTP {status}. Retrying in 60s...")
-                time.sleep(60)
-        
-            except requests.exceptions.RequestException as e:
-                # timeout, DNS, connection reset, etc.
-                logger.info(f"Network error: {e}. Retrying in 60s...")
-                time.sleep(60)
+    except Exception as e:
+        logger.into(f"446err {e}")
+    url = f"https://www.screener.in/api/company/{tk}/peers"
+    while True:
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()  # catches 4xx / 5xx
+    
+            soup = BeautifulSoup(response.text, 'html.parser')
+    
+            # success → break loop
+            break
+    
+        except requests.exceptions.HTTPError as e:
+            status = e.response.status_code
+    
+            if status == 404:
+                logger.info(f"404 Not Found → {url}")
+                return "error"   # do NOT retry
+    
+            logger.info(f"HTTP {status}. Retrying in 60s...")
+            time.sleep(60)
+    
+        except requests.exceptions.RequestException as e:
+            # timeout, DNS, connection reset, etc.
+            logger.info(f"Network error: {e}. Retrying in 60s...")
+            time.sleep(60)
+    try:
         soup = BeautifulSoup(response.text, 'html.parser')
         rows = soup.find_all("tr", attrs={"data-row-company-id": True})
         for j in rows:
@@ -453,16 +532,18 @@ def mk():
                 d["qtr_profit_var"] = qtrpv
                 d["sales_qtr"] = sqtr
                 d["qtr_sales_var"] = qtrsv
-    
+    except Exception as e:
+        logger.into(f"536err {e}")
+
+    try:
         data.append(d)
         
         tags[query] = tk
         index[query] = len(data) - 1
-        return "done"
     except Exception as e:
-        logger.info(f"Error 385 {e}")
-        return "error"
-
+        logger.into(f"446err {e}")
+    return "done"
+    
 @app.route("/rm", methods=["GET","POST"])
 def rm():
     try:
@@ -673,6 +754,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
