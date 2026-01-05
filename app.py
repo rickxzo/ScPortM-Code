@@ -581,6 +581,14 @@ def mk():
         
         tags[query] = tk
         index[query] = len(data) - 1
+        c = conn.cursor()
+        c.execute(
+            '''
+            INSERT INTO Monitor (name, id) VALUES (?,?)
+            ''', (query, tk)
+        )
+        conn.commit()
+        conn.close()
     except Exception as e:
         logger.into(f"446err {e}")
     return "done"
@@ -796,6 +804,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
