@@ -53,6 +53,7 @@ def init():
         url = f"https://www.screener.in/company/{i}/"
         logger.info(i)
         d["name"] = i
+        d["num"] = len(holdings[i]) if i in holdings.keys() else 0
         if i in alias.keys():
             d["alias"] = alias[i]
         while True:
@@ -788,6 +789,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
