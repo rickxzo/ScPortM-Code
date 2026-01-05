@@ -608,6 +608,14 @@ def rm():
     
         data.pop(n)
         tags.pop(query)
+        conn = connect_db()
+        c = conn.cursor()
+        c.execute(
+            '''
+            DELETE FROM Monitor WHERE name = ?''', (query,)
+        )
+        conn.commit()
+        conn.close()
         return "done"
     except Exception as e:
         logger.info("Error 405")
@@ -804,6 +812,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
