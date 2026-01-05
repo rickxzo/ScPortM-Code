@@ -23,10 +23,17 @@ from email.message import EmailMessage
 
 data = []
 index = {}
-tags = {
-    'BEL': 6595017,
-    'RELIANCE': 6598251
-}
+tags = {}
+conn = connect_db()
+c = conn.cursor()
+c.execute(
+    "SELECT * FROM Monitor"
+)
+rows = c.fetchall()
+for row in rows:
+    tags[row[1]] = row[3]
+conn.close()
+
 k = 0.1
 holdings = defaultdict(list)
 
@@ -789,6 +796,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
