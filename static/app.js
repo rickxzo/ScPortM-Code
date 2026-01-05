@@ -282,7 +282,8 @@ const tab2 = {
             name: r[1],
             date: r[2],
             price: r[3],
-            amt: r[4]
+            amt: r[4],
+            ...(r.length > 5 ? { alias: r[6] } : {})
           }));
           this.loading = false;
         })
@@ -365,7 +366,7 @@ const tab2 = {
 
               <div>
                 <div class="text-xs text-gray-500">Name</div>
-                <div class="font-semibold">{{ row.name }}</div>
+                <div class="font-semibold">{{ row.alias || row.name }}</div>
               </div>
 
               <div>
@@ -454,7 +455,8 @@ const tab3 = {
           profit: r[5],
           duration: r[6],
           sell_price: r[7],
-          sid: r[8]
+          sid: r[8],
+          ...(r.length > 9 ? { alias: r[9] } : {})
         }));
         this.loading = false;
       })
@@ -547,7 +549,7 @@ const tab3 = {
 
             <div>
               <div class="text-xs text-gray-500">Name</div>
-              <div class="font-semibold">{{ row.name }}</div>
+              <div class="font-semibold">{{ row.alias || row.name }}</div>
             </div>
 
             <div>
