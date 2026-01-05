@@ -23,12 +23,22 @@ from email.message import EmailMessage
 
 data = []
 index = {}
-tags = {
-    'BEL': 6595017,
-    'RELIANCE': 6598251
-}
+tags = {}
+alias = {}
+rows =  requests.get("https://scportm.pythonanywhere.com/monitors").json()
+for row in rows:
+    tags[row[1]] = row[3]
+    if row[2] != "NA":
+        alias[row[1]] = row[2]
+        
 k = 0.1
+
 holdings = defaultdict(list)
+
+rows = requests.get("https://scportm.pythonanywhere.com/holding").json()
+for row in rows:
+    holdings[row[1]].append([row[3], row[0]])
+
 
 from flask import Flask, jsonify, request, redirect, url_for, render_template
 
@@ -43,6 +53,8 @@ def init():
         url = f"https://www.screener.in/company/{i}/"
         logger.info(i)
         d["name"] = i
+        if i in alias.keys():
+            d["alias"] = alias[i]
         while True:
             try:
                 response = requests.get(url, timeout=10)
@@ -574,6 +586,12 @@ def mk():
         
         tags[query] = tk
         index[query] = len(data) - 1
+        url = "https://scportm.pythonanywhere.com/add_monitor"
+        params = {
+            "name": query,
+            "id": tk,
+        }
+        response = requests.get(url, params=params)
     except Exception as e:
         logger.into(f"446err {e}")
     return "done"
@@ -590,9 +608,13 @@ def rm():
         for i in range(n, len(data)):
             index[data[i]["name"]] -= 1
         index.pop(query)
-    
         data.pop(n)
         tags.pop(query)
+        url = "https://scportm.pythonanywhere.com/delete_monitor"
+        params = {
+            "name": query,
+        }
+        response = requests.get(url, params=params)
         return "done"
     except Exception as e:
         logger.info("Error 405")
@@ -625,20 +647,22 @@ def buy():
         if query not in index.keys():
             return "Stock not in monitoring list"
         
-        conn = connect_db()
-        c = conn.cursor()
-        c.execute(
-            '''
-            INSERT INTO Buy (name, price, amt, date) VALUES (?,?,?,?)
-            ''', (query, data[index[query]]['price'] if price=="-1" else float(price), int(num), day.strftime("%Y-%m-%d %H:%M:%S"))
-        )
-        id = c.lastrowid
-        conn.commit()
-        conn.close()
-        if holdings[query] == []:
-            holdings[query] = [[data[index[query]]['price'], id]]
-        else:
-            holdings[query].append([data[index[query]]['price'], id])
+        url = "https://scportm.pythonanywhere.com/buy"
+        params = {
+            "q": query,
+            "p": data[index[query]]['price'] if price=="-1" else float(price),
+            "n": int(num),
+            "d": date
+        }
+        res = requests.get(url, params=params)
+        dat = res.json()
+        id = dat['id']
+        holding = defaultdict(list)
+        rows = requests.get("https://scportm.pythonanywhere.com/holding").json()
+        for row in rows:
+            holding[row[1]].append([row[3], row[0]])
+        holdings = holding
+        
         for i in data:
             if i['name'] == query:
                 i['num'] = i.get('num', 0) + 1
@@ -660,38 +684,15 @@ def sell():
             return "No such holding exists"
         holdings[query] = [j for j in holdings[query] if j[1] != int(id)]
     
-        conn = connect_db()
-        c = conn.cursor()
-        c.execute(
-            "SELECT date, price, amt FROM Buy WHERE lid = ?", (int(id),)
-        )
-        row = c.fetchone()
-        buy_price = row[1]
-        sell_price = data[index[query]]['price'] if price=="-1" else float(price)
-        profit = (sell_price - buy_price) * row[2]
-        c.execute(
-            '''
-            INSERT INTO Sell (lid, profit, sell_price, date) VALUES (?,?,?,?)
-            ''', (int(id), profit, sell_price, day.strftime("%Y-%m-%d %H:%M:%S"))
-        )
-        conn.commit()
-        c.execute(
-            "SELECT Sell.date, Buy.date FROM Sell JOIN Buy ON Sell.lid = Buy.lid WHERE Sell.lid = ?", (int(id),)
-        )
-        row = c.fetchone()
-        buy_date_str = row[1]
-        sell_date_str = row[0]
-    
-        buy_date = datetime.strptime(buy_date_str, "%Y-%m-%d %H:%M:%S")
-        sell_date = datetime.strptime(sell_date_str, "%Y-%m-%d %H:%M:%S")
-        print(buy_date, sell_date)
-        duration = (sell_date - buy_date).days
-        print(duration)
-        c.execute(
-            "UPDATE Sell SET duration = ? WHERE lid = ?", (duration, int(id))
-        )
-        conn.commit()
-        conn.close()
+        url = "https://scportm.pythonanywhere.com/sell"
+        params = {
+            "q": query,
+            "p": data[index[query]]['price'] if price=="-1" else float(price),
+            "n": id,
+            "d": date,
+        }
+        res = requests.get(url, params=params)
+        
         for i in data:
             if i['name'] == query:
                 i['num'] = i.get('num', 0) - 1
@@ -707,24 +708,9 @@ def port():
 @app.route('/holding', methods=["GET","POST"])
 def holding():
     try:
-        global holdings
-        ids = []
-        for i in holdings.keys():
-            for j in holdings[i]:
-                ids.append(j[1])
-        placeholders = ', '.join('?' for _ in ids)
-        conn = connect_db()
-        c = conn.cursor()
-        c.execute(
-            f'''
-            SELECT * FROM Buy
-            WHERE lid IN ({placeholders})
-            ORDER BY name ASC
-            ''', ids
-        )
-        rows = c.fetchall()
-        print(rows)
-        conn.close()
+        url = "https://scportm.pythonanywhere.com/holding"
+        res = requests.get(url)
+        rows = res.json()
         return jsonify(rows)
     except Exception as e:
         logger.info("Error 532")
@@ -737,19 +723,10 @@ def hist():
 @app.route('/hist_data', methods=["GET","POST"])
 def history():
     try:
-        conn = connect_db()
-        c = conn.cursor()
-        c.execute(
-            '''
-            SELECT Buy.name, Buy.date, Buy.price, Buy.amt, Sell.date, Sell.profit, Sell.duration, Sell.sell_price, Sell.sid
-            FROM Buy
-            LEFT JOIN Sell ON Buy.lid = Sell.lid
-            WHERE Sell.hidden IS NULL OR Sell.hidden = 0
-            ORDER BY Buy.name ASC
-            '''
-        )
-        rows = c.fetchall()
-        conn.close()
+        url = "https://scportm.pythonanywhere.com/history"
+        res = requests.get(url)
+        rows = res.json()
+        
         return jsonify(rows)
     except Exception as e:
         logger.info("Error 557")
@@ -759,17 +736,34 @@ def history():
 def hide():
     try:
         query = request.args.get('q')
-        conn = connect_db()
-        c = conn.cursor()
-        c.execute(
-            '''
-            UPDATE Sell SET hidden = 1 WHERE sid = ?''', (int(query),)
-        )
-        conn.commit()
-        conn.close()
+        url = "https://scportm.pythonanywhere.com/hide"
+        params = {
+            "q": query,
+        }
+        res = requests.get(url, params=params)
         return redirect("/history")
     except Exception as e:
         logger.info("Error 574")
+        return "error"
+
+@app.route('/alias', methods=["GET","POST"])
+def alias():
+    try:
+        query = request.args.get('q')
+        alias = request.args.get('a')
+        global data
+        global index
+        name = query
+        data[index[name]]['alias'] = alias
+        url = "https://scportm.pythonanywhere.com/alias"
+        params = {
+            "q": query,
+            "a": alias,
+        }
+        res = requests.get(url, params=params)
+        return "done"
+    except Exception as e:
+        logger.info(f"Error 834 {e}")
         return "error"
 
 
@@ -789,6 +783,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
