@@ -711,6 +711,9 @@ def holding():
         url = "https://scportm.pythonanywhere.com/holding"
         res = requests.get(url)
         rows = res.json()
+        for i in rows:
+            if i[1] in alias.keys():
+                i.append(alias[i[1]])
         return jsonify(rows)
     except Exception as e:
         logger.info("Error 532")
@@ -726,7 +729,9 @@ def history():
         url = "https://scportm.pythonanywhere.com/history"
         res = requests.get(url)
         rows = res.json()
-        
+        for row in rows:
+            if row[0] in alias.keys():
+                row.append(alias[row[0]])
         return jsonify(rows)
     except Exception as e:
         logger.info("Error 557")
@@ -746,8 +751,8 @@ def hide():
         logger.info("Error 574")
         return "error"
 
-@app.route('/alias', methods=["GET","POST"])
-def alias():
+@app.route('/salias', methods=["GET","POST"])
+def salias():
     try:
         query = request.args.get('q')
         alias = request.args.get('a')
@@ -783,6 +788,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
