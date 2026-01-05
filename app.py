@@ -774,7 +774,7 @@ def salias():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=update, trigger="interval", minutes=15)
+scheduler.add_job(func=update, trigger="interval", minutes=30)
 scheduler.add_job(
     func=background,
     trigger="cron",
@@ -789,6 +789,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
