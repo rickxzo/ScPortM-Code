@@ -383,7 +383,7 @@ def background():
             roce = float("".join(str(nums[7]).split("</")[0][21:].split(",")))
             roe = float("".join(str(nums[8]).split("</")[0][21:].split(",")))
         except Exception as e:
-            logger.into(f"348err {e}")
+            logger.info(f"348err {e}")
 
         try:
             data[index[i]]["market_cap"] = cap
@@ -515,7 +515,7 @@ def mk():
         low = float("".join(str(nums[3]).split("</")[0][21:].split(",")))
         d["low"] = low
     except Exception as e:
-        logger.into(f"468err {e}")
+        logger.info(f"468err {e}")
     try:
         pe = float("".join(str(nums[4]).split("</")[0][21:].split(",")))
         d["pe"] = pe
@@ -599,7 +599,7 @@ def mk():
         conn.commit()
         conn.close()
     except Exception as e:
-        logger.into(f"446err {e}")
+        logger.inFo(f"446err {e}")
     return "done"
     
 @app.route("/rm", methods=["GET","POST"])
@@ -821,6 +821,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
