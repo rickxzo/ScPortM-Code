@@ -321,9 +321,9 @@ def update():
         try:
             if i in holdings.keys():
                 for j in holdings[i]:
-                    if j[0] * (1+k) < price:
+                    if float(j[0]) * (1+k) < price:
                         alert(i, "Buy", j[1])
-                    elif j[0] * (1-k) > price:
+                    elif float(j[0]) * (1-k) > price:
                         alert(i, "Sell", j[1])
         except Exception as e:
             logger.info(f"315err {e}")
@@ -783,6 +783,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
