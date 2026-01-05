@@ -36,6 +36,15 @@ conn.close()
 
 k = 0.1
 holdings = defaultdict(list)
+conn = connect_db()
+c = conn.cursor()
+c.execute(
+    "SELECT * FROM Buy WHERE sold = 0"
+)
+rows = c.fetchall()
+for row in rows:
+    holdings[row[1]].append([row[2], row[0]])
+conn.close()
 
 from flask import Flask, jsonify, request, redirect, url_for, render_template
 
@@ -812,6 +821,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
