@@ -15,8 +15,10 @@ logger = logging.getLogger(__name__)
 
 
 def connect_db():
-    conn = sqlite3.connect('db.db')
-    return conn
+    return sqlite3.connect(
+        "db.db",
+        check_same_thread=False
+    )
 
 import smtplib
 from email.message import EmailMessage
@@ -599,7 +601,7 @@ def mk():
         conn.commit()
         conn.close()
     except Exception as e:
-        logger.inFo(f"446err {e}")
+        logger.info(f"446err {e}")
     return "done"
     
 @app.route("/rm", methods=["GET","POST"])
@@ -821,6 +823,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
