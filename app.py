@@ -806,10 +806,10 @@ def salias():
 @app.route('/manual', methods=['GET','POST'])
 def manual():
     f = '''
-    Change buy alert variable: /ckbuy?q=VALUE    [ 20% -> VALUE = 0.2 ]
-    Chnage sell alert variable: /cksell?q=VALUE    [ 20% -> VALUE = 0.2 ]
-    Set alias for monitor: /salias?q=NAME&a=ALIAS    [ NAME needs to be the original tinker input ]
-    Change Auth Key: /sk?q=KEY   [ Restricts portfolio, history data & buy, sell, remove actions ]
+    Change buy alert variable: /ckbuy?q=VALUE    [ 20% -> VALUE = 0.2 ]\n
+    Change sell alert variable: /cksell?q=VALUE    [ 20% -> VALUE = 0.2 ]\n
+    Set alias for monitor: /salias?q=NAME&a=ALIAS    [ NAME needs to be the original tinker input ]\n
+    Change Auth Key: /sk?q=KEY   [ Restricts portfolio, history data & buy, sell, remove actions ]\n
     '''
     return f
 
@@ -830,6 +830,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
