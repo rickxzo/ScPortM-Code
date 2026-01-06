@@ -811,6 +811,7 @@ def manual():
     Set alias for monitor: /salias?q=NAME&a=ALIAS    [ NAME needs to be the original tinker input ]
     Change Auth Key: /sk?q=KEY   [ Restricts portfolio, history data & buy, sell, remove actions ]
     '''
+    return f
 
 
 scheduler = BackgroundScheduler()
@@ -829,6 +830,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
