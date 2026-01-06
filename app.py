@@ -477,6 +477,16 @@ def background():
 def mk():
     query = request.args.get('q')
     tk = request.args.get('tk')
+    global key
+    url = "https://scportm.pythonanywhere.com/add_monitor"
+    params = {
+        "name": query,
+        "id": tk,
+        "key": key
+    }
+    response = requests.get(url, params=params)
+    if response.json() == []:
+        return "err"
     global tags
     global index
     global data
@@ -611,14 +621,6 @@ def mk():
         
         tags[query] = tk
         index[query] = len(data) - 1
-        global key
-        url = "https://scportm.pythonanywhere.com/add_monitor"
-        params = {
-            "name": query,
-            "id": tk,
-            "key": key
-        }
-        response = requests.get(url, params=params)
     except Exception as e:
         logger.into(f"446err {e}")
     return "done"
@@ -702,6 +704,8 @@ def buy():
         }
         res = requests.get(url, params=params)
         dat = res.json()
+        if dat == []:
+            return "err"
         id = dat['id']
         holding = defaultdict(list)
         rows = requests.get(f"https://scportm.pythonanywhere.com/holding?key={key}").json()
@@ -728,8 +732,6 @@ def sell():
         global holdings
         if int(id) not in [j[1] for j in holdings[query]]:
             return "No such holding exists"
-        holdings[query] = [j for j in holdings[query] if j[1] != int(id)]
-
         global key
         url = "https://scportm.pythonanywhere.com/sell"
         params = {
@@ -740,7 +742,9 @@ def sell():
             "key": key
         }
         res = requests.get(url, params=params)
-        
+        if res.json() == []:
+            return "err"
+        holdings[query] = [j for j in holdings[query] if j[1] != int(id)]
         for i in data:
             if i['name'] == query:
                 i['num'] = i.get('num', 0) - 1
@@ -861,6 +865,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
