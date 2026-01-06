@@ -627,6 +627,15 @@ def mk():
 def rm():
     try:
         query = request.args.get('q')
+        global key
+        url = "https://scportm.pythonanywhere.com/delete_monitor"
+        params = {
+            "name": query,
+            "key": key
+        }
+        response = requests.get(url, params=params)
+        if response.json() == []:
+            return "err"
         global data
         global index
         global tags
@@ -637,13 +646,6 @@ def rm():
         index.pop(query)
         data.pop(n)
         tags.pop(query)
-        global key
-        url = "https://scportm.pythonanywhere.com/delete_monitor"
-        params = {
-            "name": query,
-            "key": key
-        }
-        response = requests.get(url, params=params)
         return "done"
     except Exception as e:
         logger.info("Error 405")
