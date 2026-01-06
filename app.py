@@ -32,6 +32,7 @@ for row in rows:
         alias[row[1]] = row[2]
         
 k = 0.1
+key=""
 
 holdings = defaultdict(list)
 
@@ -241,11 +242,16 @@ def get_tags():
     global tags
     return tags
 
-
 @app.route("/data", methods=["GET","POST"])
 def all_data():
     global data
     return jsonify(data)
+
+@app.route('/sk', methods=["GET","POST"])
+def set_key():
+    global key 
+    key = request.args.get('q')
+    return 'done'
 
 @app.route("/update", methods=["GET","POST"])
 def update():
@@ -799,6 +805,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
