@@ -31,7 +31,8 @@ for row in rows:
     if row[2] != "NA":
         alias[row[1]] = row[2]
         
-k = 0.1
+k1 = 0.1
+k2 = 0.1
 key=""
 
 holdings = defaultdict(list)
@@ -260,7 +261,8 @@ def update():
     global data
     global index
     global holdings
-    global k
+    global k1
+    global k2
     for i in tags.keys():
         sleep(10)
         url = f"https://www.screener.in/company/{i}/"
@@ -328,9 +330,9 @@ def update():
         try:
             if i in holdings.keys():
                 for j in holdings[i]:
-                    if float(j[0]) * (1+k) < price:
+                    if float(j[0]) * (1+k1) < price:
                         alert(i, "Buy", j[1])
-                    elif float(j[0]) * (1-k) > price:
+                    elif float(j[0]) * (1-k2) > price:
                         alert(i, "Sell", j[1])
         except Exception as e:
             logger.info(f"315err {e}")
@@ -631,15 +633,28 @@ def rm():
         logger.info("Error 405")
         return "error"
     
-@app.route("/ck", methods=["GET", "POST"])
-def ck():
+@app.route("/ckbuy", methods=["GET", "POST"])
+def ck1():
     try:
         query = request.args.get('q')
-        global k
+        global k1
         if query == "NC":
-            return str(k)
-        k = float(query)
-        return f"done : {k}"
+            return str(k1)
+        k1 = float(query)
+        return f"done : {k1}"
+    except Exception as e:
+        logger.info("Error 418")
+        return "error"
+
+@app.route("/cksell", methods=["GET", "POST"])
+def ck2():
+    try:
+        query = request.args.get('q')
+        global k2
+        if query == "NC":
+            return str(k2)
+        k2 = float(query)
+        return f"done : {k2}"
     except Exception as e:
         logger.info("Error 418")
         return "error"
@@ -788,6 +803,15 @@ def salias():
         logger.info(f"Error 834 {e}")
         return "error"
 
+@app.route('/manual', methods=['GET','POST'])
+def manual():
+    f = '''
+    Change buy alert variable: /ckbuy?q=VALUE    [ 20% -> VALUE = 0.2 ]
+    Chnage sell alert variable: /cksell?q=VALUE    [ 20% -> VALUE = 0.2 ]
+    Set alias for monitor: /salias?q=NAME&a=ALIAS    [ NAME needs to be the original tinker input ]
+    Change Auth Key: /sk?q=KEY   [ Restricts portfolio, history data & buy, sell, remove actions ]
+    '''
+
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=update, trigger="interval", minutes=30)
@@ -805,6 +829,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
