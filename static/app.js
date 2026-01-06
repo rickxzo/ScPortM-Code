@@ -436,7 +436,7 @@ const tab3 = {
 
     totalProfit() {
       return this.filteredRows.reduce(
-        (sum, r) => sum + (r.profit ?? 0),
+        (sum, r) => sum + parseFloat(r.profit || 0),
         0
       );
     }
