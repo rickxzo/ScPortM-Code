@@ -587,10 +587,12 @@ def mk():
         
         tags[query] = tk
         index[query] = len(data) - 1
+        global key
         url = "https://scportm.pythonanywhere.com/add_monitor"
         params = {
             "name": query,
             "id": tk,
+            "key": key
         }
         response = requests.get(url, params=params)
     except Exception as e:
@@ -611,9 +613,11 @@ def rm():
         index.pop(query)
         data.pop(n)
         tags.pop(query)
+        global key
         url = "https://scportm.pythonanywhere.com/delete_monitor"
         params = {
             "name": query,
+            "key": key
         }
         response = requests.get(url, params=params)
         return "done"
@@ -647,19 +651,21 @@ def buy():
         global holdings
         if query not in index.keys():
             return "Stock not in monitoring list"
-        
+
+        global key
         url = "https://scportm.pythonanywhere.com/buy"
         params = {
             "q": query,
             "p": data[index[query]]['price'] if price=="-1" else float(price),
             "n": int(num),
-            "d": date
+            "d": date,
+            "key": key
         }
         res = requests.get(url, params=params)
         dat = res.json()
         id = dat['id']
         holding = defaultdict(list)
-        rows = requests.get("https://scportm.pythonanywhere.com/holding").json()
+        rows = requests.get(f"https://scportm.pythonanywhere.com/holding?key={key}").json()
         for row in rows:
             holding[row[1]].append([row[3], row[0]])
         holdings = holding
@@ -684,13 +690,15 @@ def sell():
         if int(id) not in [j[1] for j in holdings[query]]:
             return "No such holding exists"
         holdings[query] = [j for j in holdings[query] if j[1] != int(id)]
-    
+
+        global key
         url = "https://scportm.pythonanywhere.com/sell"
         params = {
             "q": query,
             "p": data[index[query]]['price'] if price=="-1" else float(price),
             "n": id,
             "d": date,
+            "key": key
         }
         res = requests.get(url, params=params)
         
@@ -709,7 +717,8 @@ def port():
 @app.route('/holding', methods=["GET","POST"])
 def holding():
     try:
-        url = "https://scportm.pythonanywhere.com/holding"
+        global key
+        url = f"https://scportm.pythonanywhere.com/holding?key={key}"
         res = requests.get(url)
         rows = res.json()
         for i in rows:
@@ -727,7 +736,8 @@ def hist():
 @app.route('/hist_data', methods=["GET","POST"])
 def history():
     try:
-        url = "https://scportm.pythonanywhere.com/history"
+        global key
+        url = f"https://scportm.pythonanywhere.com/history?key={key}"
         res = requests.get(url)
         rows = res.json()
         for row in rows:
@@ -789,6 +799,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
