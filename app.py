@@ -230,14 +230,18 @@ def home():
 
 @app.route('/reset', methods=['GET', 'POST'])
 def reset():
-    global key
-    rows = requests.get(f"https://scportm.pythonanywhere.com/holding?key={key}").json()
-    holding = defaultdict(list)
-    for row in rows:
-        holding[row[1]].append([row[3], row[0]])
-    global holdings
-    holdings = holding
-    return "done"
+    try
+        global key
+        rows = requests.get(f"https://scportm.pythonanywhere.com/holding?key={key}").json()
+        holding = defaultdict(list)
+        for row in rows:
+            holding[row[1]].append([row[3], row[0]])
+        global holdings
+        holdings = holding
+        return "done"
+    except Exception as e:
+        logger.info(f"err 243 {e}")
+        return "err"
     
 
 @app.route('/index', methods=["GET","POST"])
@@ -831,6 +835,10 @@ def manual():
     Change Auth Key:
       /sk?q=KEY
       (Restricts portfolio, history, buy/sell/remove actions)
+
+    USE AFTER ALL APP DOWNTIME:
+      /reset
+      (Resets lost holding data with auth, needs /sk set prior)
     """
     return Response(text, mimetype="text/plain")
 
@@ -851,6 +859,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
