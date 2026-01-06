@@ -42,7 +42,7 @@ for row in rows:
     holdings[row[1]].append([row[3], row[0]])
 
 
-from flask import Flask, jsonify, request, redirect, url_for, render_template
+from flask import Flask, jsonify, request, redirect, url_for, render_template, Response
 
 
 def init():
@@ -227,6 +227,18 @@ app.secret_key = "something"
 @app.route("/", methods=["GET","POST"])
 def home():
     return render_template("index.html")
+
+@app.route('/reset', methods=['GET', 'POST'])
+def reset():
+    global key
+    rows = requests.get(f"https://scportm.pythonanywhere.com/holding?key={key}").json()
+    holding = defaultdict(list)
+    for row in rows:
+        holding[row[1]].append([row[3], row[0]])
+    global holdings
+    holdings = holding
+    return "done"
+    
 
 @app.route('/index', methods=["GET","POST"])
 def get_index():
@@ -805,13 +817,22 @@ def salias():
 
 @app.route('/manual', methods=['GET','POST'])
 def manual():
-    f = '''
-    Change buy alert variable: /ckbuy?q=VALUE    [ 20% -> VALUE = 0.2 ]\n
-    Change sell alert variable: /cksell?q=VALUE    [ 20% -> VALUE = 0.2 ]\n
-    Set alias for monitor: /salias?q=NAME&a=ALIAS    [ NAME needs to be the original tinker input ]\n
-    Change Auth Key: /sk?q=KEY   [ Restricts portfolio, history data & buy, sell, remove actions ]\n
-    '''
-    return f
+    text = """\
+    Change buy alert variable:
+      /ckbuy?q=VALUE        (20% -> VALUE = 0.2)
+    
+    Change sell alert variable:
+      /cksell?q=VALUE       (20% -> VALUE = 0.2)
+    
+    Set alias for monitor:
+      /salias?q=NAME&a=ALIAS
+      (NAME must be the original ticker input)
+    
+    Change Auth Key:
+      /sk?q=KEY
+      (Restricts portfolio, history, buy/sell/remove actions)
+    """
+    return Response(text, mimetype="text/plain")
 
 
 scheduler = BackgroundScheduler()
@@ -830,6 +851,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
