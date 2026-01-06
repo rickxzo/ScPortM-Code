@@ -230,7 +230,7 @@ def home():
 
 @app.route('/reset', methods=['GET', 'POST'])
 def reset():
-    try
+    try:
         global key
         rows = requests.get(f"https://scportm.pythonanywhere.com/holding?key={key}").json()
         holding = defaultdict(list)
@@ -859,6 +859,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
