@@ -367,7 +367,7 @@ def update():
                             logger.info("Success 132")
                         except Exception as e:
                             logger.info(f"Error 134 {e}")
-                            return break
+                            break
                     elif float(j[0]) * (1-k2) > float(price):
                         try:
                             action = "Buy"
@@ -386,7 +386,7 @@ def update():
                             logger.info("Success 132")
                         except Exception as e:
                             logger.info(f"Error 134 {e}")
-                            return break
+                            break
         except Exception as e:
             logger.info(f"315err {e}")
             
@@ -902,6 +902,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
