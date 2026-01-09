@@ -216,7 +216,7 @@ def alert(name, action, id):
             smtp.send_message(msg)
         logger.info("Success 132")
     except Exception as e:
-        logger.info("Error 134")
+        logger.info(f"Error 134 {e}")
         return "error"
 
 
@@ -868,6 +868,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
