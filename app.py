@@ -52,7 +52,7 @@ def init():
     for i in tags.keys():
         sleep(10)
         d = {}
-        url = f"https://www.screener.in/company/{i}/consolidated/"
+        url = f"https://www.screener.in/company/{i}/"
         logger.info(i)
         d["name"] = i
         d["num"] = len(holdings[i]) if i in holdings.keys() else 0
@@ -281,7 +281,7 @@ def update():
     global k2
     for i in tags.keys():
         sleep(10)
-        url = f"https://www.screener.in/company/{i}/consolidated/"
+        url = f"https://www.screener.in/company/{i}/"
         logger.info(f"Updating {i}")
         while True:
             try:
@@ -365,7 +365,7 @@ def background():
     global data
     for i in tags.keys():
         sleep(10)
-        url = f"https://www.screener.in/company/{i}/consolidated/"
+        url = f"https://www.screener.in/company/{i}/"
         while True:
             try:
                 response = requests.get(url, timeout=10)
@@ -492,7 +492,7 @@ def mk():
     global tags
     global index
     global data
-    url = f"https://www.screener.in/company/{query}/consolidated/"
+    url = f"https://www.screener.in/company/{query}/"
     d = {}
     d["name"] = query
     while True:
@@ -867,6 +867,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
