@@ -346,6 +346,7 @@ def update():
             logger.info(f"305err {e}")
 
         try:
+            '''
             if i in holdings.keys():
                 for j in holdings[i]:
                     logger.info(f'alert conditions: {j[0]} {1+k1} {1-k2}')
@@ -381,6 +382,45 @@ def update():
                         except Exception as e:
                             logger.info(f"Error 134 {e}")
                             break
+            '''
+            if i in holdings.keys():
+                bdiff = int(holdings[i][0][0]) * k1
+                sdiff = int(holdings[i][0][0]) * k2
+                for j in holdings[i]:
+                    if float(j[0]) + bdiff < float(price):
+                        action = "Sell"
+                        name = i
+                        id = j[1]
+                        try:
+                            url = "https://scportm.pythonanywhere.com/mail"
+                            params = {
+                                "a": action,
+                                "n": name,
+                                "i": id
+                            }
+                            response = requests.get(url, params=params)
+                            logger.info(response.json())  
+                        except Exception as e:
+                            logger.info(f"Error 134 {e}")
+                            break
+                    elif float(j[0]) - sdiff > float(price):
+                        try:
+                            action = "Buy"
+                            name = i
+                            id = j[1]
+                            url = "https://scportm.pythonanywhere.com/mail"
+                            params = {
+                                "a": action,
+                                "n": name,
+                                "i": id
+                            }
+                            response = requests.get(url, params=params)
+                            logger.info(response.json())  
+                        except Exception as e:
+                            logger.info(f"Error 134 {e}")
+                            break
+                        
+            
         except Exception as e:
             logger.info(f"315err {e}")
             
@@ -896,6 +936,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
