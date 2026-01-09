@@ -272,7 +272,7 @@ def set_key():
 
 @app.route("/update", methods=["GET","POST"])
 def update():
-    print("exec1")
+    logger.info("exec1")
     global tags
     global data
     global index
@@ -282,6 +282,7 @@ def update():
     for i in tags.keys():
         sleep(10)
         url = f"https://www.screener.in/company/{i}/consolidated/"
+        logger.info(f"Updating {i}")
         while True:
             try:
                 response = requests.get(url, timeout=10)
@@ -316,6 +317,7 @@ def update():
 
         try:
             price = float("".join(str(nums[1]).split("</")[0][21:].split(",")))
+            logger.info(f"Price change from {data[index[i]]["price"]} to {price}")
             data[index[i]]["price"] = price
         except Exception as e:
             data[index[i]]["price"] = -1
@@ -850,7 +852,7 @@ def manual():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=update, trigger="interval", minutes=30)
+scheduler.add_job(func=update, trigger="interval", minutes=5)
 scheduler.add_job(
     func=background,
     trigger="cron",
@@ -865,6 +867,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
