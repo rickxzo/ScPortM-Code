@@ -391,7 +391,7 @@ def update():
                 if ppoint + sdiff < price:
                     action = "Sell"
                     name = i
-                    id = j[1]
+                    id = holdings[i][bn-1][1]
                     try:
                         url = "https://scportm.pythonanywhere.com/mail"
                         params = {
@@ -407,7 +407,7 @@ def update():
                 elif ppoint - bdiff > price:
                     action = "Buy"
                     name = i
-                    id = j[1]
+                    id = holdings[i][bn-1][1]
                     try:
                         url = "https://scportm.pythonanywhere.com/mail"
                         params = {
@@ -937,6 +937,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
