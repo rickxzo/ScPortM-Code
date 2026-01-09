@@ -350,9 +350,43 @@ def update():
                 for j in holdings[i]:
                     logger.info(f'alert conditions: {j[0]} {1+k1} {1-k2}')
                     if float(j[0]) * (1+k1) < float(price):
-                        alert(i, "Buy", j[1])
+                        action = "Buy"
+                        name = i
+                        id = j[1]
+                        try:
+                            msg = EmailMessage()
+                            msg['Subject'] = f'Stock Action Alert - {action} {name}'
+                            msg['From'] = 'nk1804417@gmail.com'
+                            msg['To'] = 'rickxzo.perz@gmail.com' #'kishor2376@gmail.com'
+                            msg.set_content(
+                                f"Stock data for {name} has triggered an {action} alert for lot ID {id}."
+                            )
+                            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                                smtp.login('nk1804417@gmail.com', 'ootd rwtk hxyh ygod')
+                                smtp.send_message(msg)
+                            logger.info("Success 132")
+                        except Exception as e:
+                            logger.info(f"Error 134 {e}")
+                            return break
                     elif float(j[0]) * (1-k2) > float(price):
-                        alert(i, "Sell", j[1])
+                        try:
+                            action = "Buy"
+                            name = i
+                            id = j[1]
+                            msg = EmailMessage()
+                            msg['Subject'] = f'Stock Action Alert - {action} {name}'
+                            msg['From'] = 'nk1804417@gmail.com'
+                            msg['To'] = 'rickxzo.perz@gmail.com' #'kishor2376@gmail.com'
+                            msg.set_content(
+                                f"Stock data for {name} has triggered an {action} alert for lot ID {id}."
+                            )
+                            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                                smtp.login('nk1804417@gmail.com', 'ootd rwtk hxyh ygod')
+                                smtp.send_message(msg)
+                            logger.info("Success 132")
+                        except Exception as e:
+                            logger.info(f"Error 134 {e}")
+                            return break
         except Exception as e:
             logger.info(f"315err {e}")
             
@@ -868,6 +902,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
