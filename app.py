@@ -384,41 +384,42 @@ def update():
                             break
             '''
             if i in holdings.keys():
-                bdiff = int(holdings[i][0][0]) * k1
-                sdiff = int(holdings[i][0][0]) * k2
-                for j in holdings[i]:
-                    if float(j[0]) + bdiff < float(price):
-                        action = "Sell"
-                        name = i
-                        id = j[1]
-                        try:
-                            url = "https://scportm.pythonanywhere.com/mail"
-                            params = {
-                                "a": action,
-                                "n": name,
-                                "i": id
-                            }
-                            response = requests.get(url, params=params)
-                            logger.info(response.json())  
-                        except Exception as e:
-                            logger.info(f"Error 134 {e}")
-                            break
-                    elif float(j[0]) - sdiff > float(price):
-                        try:
-                            action = "Buy"
-                            name = i
-                            id = j[1]
-                            url = "https://scportm.pythonanywhere.com/mail"
-                            params = {
-                                "a": action,
-                                "n": name,
-                                "i": id
-                            }
-                            response = requests.get(url, params=params)
-                            logger.info(response.json())  
-                        except Exception as e:
-                            logger.info(f"Error 134 {e}")
-                            break
+                bdiff = float(holdings[i][0][0]) * k1
+                sdiff = float(holdings[i][0][0]) * k2
+                bn = len(holdings[i])
+                ppoint = float(holdings[i][bn-1][0])
+                if ppoint + sdiff < price:
+                    action = "Sell"
+                    name = i
+                    id = j[1]
+                    try:
+                        url = "https://scportm.pythonanywhere.com/mail"
+                        params = {
+                            "a": action,
+                            "n": name,
+                            "i": id
+                        }
+                        response = requests.get(url, params=params)
+                        logger.info(response.json())  
+                    except Exception as e:
+                        logger.info(f"Error 134 {e}")
+                        break
+                elif ppoint - bdiff > price:
+                    action = "Buy"
+                    name = i
+                    id = j[1]
+                    try:
+                        url = "https://scportm.pythonanywhere.com/mail"
+                        params = {
+                            "a": action,
+                            "n": name,
+                            "i": id
+                        }
+                        response = requests.get(url, params=params)
+                        logger.info(response.json())  
+                    except Exception as e:
+                        logger.info(f"Error 134 {e}")
+                        break
                         
             
         except Exception as e:
@@ -936,6 +937,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
