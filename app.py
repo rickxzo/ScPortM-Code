@@ -348,7 +348,7 @@ def update():
         try:
             if i in holdings.keys():
                 for j in holdings[i]:
-                    logger.info(f'alert conditions: {j[0]} {1+k1} {1-k2}'
+                    logger.info(f'alert conditions: {j[0]} {1+k1} {1-k2}')
                     if float(j[0]) * (1+k1) < float(price):
                         alert(i, "Buy", j[1])
                     elif float(j[0]) * (1-k2) > float(price):
@@ -868,6 +868,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
