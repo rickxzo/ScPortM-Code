@@ -298,7 +298,7 @@ def update():
         
                 if status == 404:
                     logger.info(f"404 Not Found → {url}")
-                    return "error"   # do NOT retry
+                    break
         
                 logger.info(f"HTTP {status}. Retrying in 60s...")
                 time.sleep(60)
@@ -867,6 +867,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
