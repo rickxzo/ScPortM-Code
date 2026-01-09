@@ -207,7 +207,7 @@ def alert(name, action, id):
         msg = EmailMessage()
         msg['Subject'] = f'Stock Action Alert - {action} {name}'
         msg['From'] = 'nk1804417@gmail.com'
-        msg['To'] = 'kishor2376@gmail.com'
+        msg['To'] = 'rickxzo.perz@gmail.com' #'kishor2376@gmail.com'
         msg.set_content(
             f"Stock data for {name} has triggered an {action} alert for lot ID {id}."
         )
@@ -348,9 +348,10 @@ def update():
         try:
             if i in holdings.keys():
                 for j in holdings[i]:
-                    if float(j[0]) * (1+k1) < price:
+                    logger.info(f'alert conditions: {j[0]} {1+k1} {1-k2}'
+                    if float(j[0]) * (1+k1) < float(price):
                         alert(i, "Buy", j[1])
-                    elif float(j[0]) * (1-k2) > price:
+                    elif float(j[0]) * (1-k2) > float(price):
                         alert(i, "Sell", j[1])
         except Exception as e:
             logger.info(f"315err {e}")
@@ -852,7 +853,7 @@ def manual():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=update, trigger="interval", minutes=30)
+scheduler.add_job(func=update, trigger="interval", minutes=5)
 scheduler.add_job(
     func=background,
     trigger="cron",
@@ -867,6 +868,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
