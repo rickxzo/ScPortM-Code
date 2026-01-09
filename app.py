@@ -480,16 +480,6 @@ def background():
 def mk():
     query = request.args.get('q')
     tk = request.args.get('tk')
-    global key
-    url = "https://scportm.pythonanywhere.com/add_monitor"
-    params = {
-        "name": query,
-        "id": tk,
-        "key": key
-    }
-    response = requests.get(url, params=params)
-    if response.json() == []:
-        return "err"
     global tags
     global index
     global data
@@ -511,7 +501,7 @@ def mk():
     
             if status == 404:
                 logger.info(f"404 Not Found → {url}")
-                return "error"   # do NOT retry
+                return "err"  # do NOT retry
     
             logger.info(f"HTTP {status}. Retrying in 60s...")
             time.sleep(60)
@@ -522,6 +512,16 @@ def mk():
             time.sleep(60)
 
     try:
+        global key
+        url = "https://scportm.pythonanywhere.com/add_monitor"
+        params = {
+            "name": query,
+            "id": tk,
+            "key": key
+        }
+        response = requests.get(url, params=params)
+        if response.json() == []:
+            return "err"
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         logger.info(div)
@@ -653,7 +653,7 @@ def rm():
         tags.pop(query)
         return "done"
     except Exception as e:
-        logger.info("Error 405")
+        logger.info(f"Error 405 {e}")
         return "error"
     
 @app.route("/ckbuy", methods=["GET", "POST"])
@@ -666,7 +666,7 @@ def ck1():
         k1 = float(query)
         return f"done : {k1}"
     except Exception as e:
-        logger.info("Error 418")
+        logger.info(f"Error 418 {e}")
         return "error"
 
 @app.route("/cksell", methods=["GET", "POST"])
@@ -679,7 +679,7 @@ def ck2():
         k2 = float(query)
         return f"done : {k2}"
     except Exception as e:
-        logger.info("Error 418")
+        logger.info(f"Error 418 {e}")
         return "error"
 
 @app.route("/buy", methods=["GET","POST"])
@@ -721,7 +721,7 @@ def buy():
                 i['num'] = i.get('num', 0) + 1
         return redirect("/portfolio")
     except Exception as e:
-        logger.info("Error 450")
+        logger.info(f"Error 450 {e}")
         return "error"
 
 @app.route('/sell', methods=["GET","POST"])
@@ -753,7 +753,7 @@ def sell():
                 i['num'] = i.get('num', 0) - 1
         return redirect("/portfolio")
     except Exception as e:
-        logger.info("Error 503")
+        logger.info(f"Error 503 {e}")
         return "error"
 
 @app.route('/portfolio', methods=["GET","POST"])
@@ -772,7 +772,7 @@ def holding():
                 i.append(alias[i[1]])
         return jsonify(rows)
     except Exception as e:
-        logger.info("Error 532")
+        logger.info(f"Error 532 {e}")
         return "error"
 
 @app.route('/history', methods=["GET","POST"])
@@ -791,7 +791,7 @@ def history():
                 row.append(alias[row[0]])
         return jsonify(rows)
     except Exception as e:
-        logger.info("Error 557")
+        logger.info(f"Error 557 {e}")
         return "error"
 
 @app.route('/hide', methods=["GET","POST"])
@@ -868,6 +868,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
