@@ -38,6 +38,7 @@ key=""
 holdings = defaultdict(list)
 
 rows = requests.get("https://scportm.pythonanywhere.com/holding").json()
+rows.sort(key=lambda row: row[0])
 for row in rows:
     holdings[row[1]].append([row[3], row[0]])
 
@@ -233,6 +234,7 @@ def reset():
     try:
         global key
         rows = requests.get(f"https://scportm.pythonanywhere.com/holding?key={key}").json()
+        rows.sort(key=lambda row: row[0])
         holding = defaultdict(list)
         for row in rows:
             holding[row[1]].append([row[3], row[0]])
@@ -937,6 +939,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
