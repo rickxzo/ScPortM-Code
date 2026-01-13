@@ -240,6 +240,10 @@ def reset():
             holding[row[1]].append([row[3], row[0]])
         global holdings
         holdings = holding
+        global data
+        for i in data:
+            if i['name'] in holding.keys():
+                i['nums'] = len(holding[i['name']])
         return "done"
     except Exception as e:
         logger.info(f"err 243 {e}")
@@ -940,6 +944,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
