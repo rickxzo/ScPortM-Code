@@ -434,12 +434,21 @@ const tab3 = {
       );
     },
 
+    //totalProfit() {
+    //  return this.filteredRows.reduce(
+    //    (sum, r) => sum + parseFloat(r.profit || 0),
+     //   0
+     // );
+   // }
     totalProfit() {
-      return this.filteredRows.reduce(
-        (sum, r) => sum + parseFloat(r.profit || 0),
-        0
-      );
+      return this.filteredRows
+        .filter(r => r.sell_price === null || r.sell_price === undefined)
+        .reduce(
+          (sum, r) => sum + parseFloat(r.profit || 0),
+          0
+        );
     }
+
   },
 
   mounted() {
