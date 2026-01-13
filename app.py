@@ -554,7 +554,7 @@ def mk():
     global tags
     global index
     global data
-    url = f"https://www.screener.in/company/{query}/"
+    url = f"https://www.screener.in/company/{query}"
     d = {}
     d["name"] = query
     while True:
