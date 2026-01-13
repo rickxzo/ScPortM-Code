@@ -583,6 +583,7 @@ def mk():
             time.sleep(60)
 
     try:
+        
         global key
         url = "https://scportm.pythonanywhere.com/add_monitor"
         params = {
@@ -590,8 +591,8 @@ def mk():
             "id": tk,
             "key": key
         }
-        response = requests.get(url, params=params)
-        if response.json() == []:
+        api_add = requests.get(url, params=params)
+        if api_add.json() == []:
             return "err"
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
@@ -620,7 +621,7 @@ def mk():
         low = float("".join(str(nums[3]).split("</")[0][21:].split(",")))
         d["low"] = low
     except Exception as e:
-        logger.into(f"468err {e}")
+        logger.info(f"468err {e}")
     try:
         pe = float("".join(str(nums[4]).split("</")[0][21:].split(",")))
         d["pe"] = pe
@@ -939,6 +940,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
