@@ -432,7 +432,7 @@ const tab3 = {
         (sum, r) => sum + parseFloat(r.profit || 0),
         0
       );
-    }
+    },
     
     totalBuy() {
         return this.filteredRows
