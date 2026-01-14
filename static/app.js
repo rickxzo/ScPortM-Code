@@ -427,27 +427,23 @@ const tab3 = {
       );
     },
 
-    totalBuy() {
+    totalProfit() {
       return this.filteredRows.reduce(
-        (sum, r) => sum + r.buy_price * r.amt,
+        (sum, r) => sum + parseFloat(r.profit || 0),
         0
       );
-    },
-
-    //totalProfit() {
-    //  return this.filteredRows.reduce(
-    //    (sum, r) => sum + parseFloat(r.profit || 0),
-     //   0
-     // );
-   // }
-    totalProfit() {
-      return this.filteredRows
-        .filter(r => r.sell_price === null || r.sell_price === undefined)
-        .reduce(
-          (sum, r) => sum + parseFloat(r.profit || 0),
-          0
-        );
     }
+    
+    totalBuy() {
+        return this.filteredRows
+          .filter(r => r.sell_price == null) // covers null & undefined
+          .reduce((sum, r) => {
+            const buy = parseFloat(r.buy_price) || 0;
+            const amt = parseFloat(r.amt) || 0;
+            return sum + buy * amt;
+          }, 0);
+      }
+
 
   },
 
