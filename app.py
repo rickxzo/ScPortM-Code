@@ -208,7 +208,7 @@ def alert(name, action, id):
         msg = EmailMessage()
         msg['Subject'] = f'Stock Action Alert - {action} {name}'
         msg['From'] = 'nk1804417@gmail.com'
-        msg['To'] = 'rickxzo.perz@gmail.com' #'kishor2376@gmail.com'
+        msg['To'] = 'kishor2376@gmail.com'
         msg.set_content(
             f"Stock data for {name} has triggered an {action} alert for lot ID {id}."
         )
@@ -942,6 +942,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
