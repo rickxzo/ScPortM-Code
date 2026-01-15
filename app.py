@@ -821,7 +821,7 @@ def sell():
         res = requests.get(url, params=params)
         logger.info(res)
         logger.info(res.text)
-        if res.json() == []:
+        if res.text == "[]":
             return "err"
         holdings[query] = [j for j in holdings[query] if j[1] != int(id)]
         data[index[query]]['num'] = len(holdings[query])
@@ -942,6 +942,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
