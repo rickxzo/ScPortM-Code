@@ -747,6 +747,7 @@ def sell():
         for i in data:
             if i['name'] == query:
                 i['num'] = i.get('num', 0) - 1
+        reset()
         return redirect("/portfolio")
     except Exception as e:
         logger.info("Error 503")
@@ -864,6 +865,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
