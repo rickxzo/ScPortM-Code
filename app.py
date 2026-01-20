@@ -335,10 +335,10 @@ def update():
             logger.info(f"276err {e}")
 
         try:
-            if price <= 0.6 * data[index[i]]["high"]:
+            if price <= 0.7 * data[index[i]]["high"]:
                 data[index[i]]["tag"] = 1
     
-            elif price >= 0.985 * data[index[i]]["high"]:
+            elif price >= 0.9 * data[index[i]]["high"]:
                 data[index[i]]["tag"] = -1
     
             else:
@@ -865,6 +865,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
